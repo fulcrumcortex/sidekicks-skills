@@ -1,0 +1,19 @@
+{"scripts": {"plugins/fulcrum-hospitality/skills/reservation-desk/scripts/covers_check.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["tests/fixtures/reservation-desk/bookings.csv", "--seats", "30", "--pacing", "12", "--service", "17:30-21:00", "--try", "19:00,4"],
+       "expect_exit": [0],
+       "expect_stdout": ["| 19:00 | 30 | 18 | over pacing by 6 |", "| 19:30 | 32 | 2 | over seats by 2 |", "Bookings: 8, covers: 34, seats: 30", "Ellis J (2) arrives 21:15, outside service 17:30-21:00", "Request 19:00 for 4: does not fit", "Alternatives within 60 min: 20:00"],
+       "expect_stderr": ["skipping line 11"]},
+      {"kind": "empty", "args": ["tests/fixtures/reservation-desk/empty.csv", "--seats", "30", "--pacing", "12", "--service", "17:30-21:00"],
+       "expect_exit": [0], "expect_stdout": ["Bookings: 0, covers: 0"], "expect_stderr": ["bookings file is empty"]},
+      {"kind": "missing-field", "args": ["tests/fixtures/reservation-desk/missing-field.csv", "--seats", "30", "--pacing", "12", "--service", "17:30-21:00"],
+       "expect_exit": [1], "expect_stderr": ["missing columns: party_size"]},
+      {"kind": "edge", "args": ["tests/fixtures/reservation-desk/bad-rows.csv", "--seats", "30", "--pacing", "12", "--service", "17:30-21:00"],
+       "expect_exit": [0], "expect_stdout": ["Bookings: 1, covers: 4"], "expect_stderr": ["got '7pm'", "got '19:00', '0'", "duration 'abc'", "got '25:00'"]},
+      {"kind": "edge", "args": ["tests/fixtures/reservation-desk/header-only.csv", "--seats", "30", "--pacing", "12", "--service", "17:30-21:00", "--try", "19:00,4"],
+       "expect_exit": [0], "expect_stdout": ["Request 19:00 for 4: fits"]},
+      {"kind": "edge", "args": ["tests/fixtures/reservation-desk/bookings.csv", "--seats", "30", "--pacing", "12", "--service", "21:00-17:30"],
+       "expect_exit": [2], "expect_stderr": ["last seating is before the start of service"]}
+    ]}}}

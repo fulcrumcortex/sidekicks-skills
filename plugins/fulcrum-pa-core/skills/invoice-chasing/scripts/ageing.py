@@ -28,6 +28,8 @@ Examples:
   python3 ageing.py export.csv --eom --terms 30 --detail
 """
 
+from __future__ import annotations
+
 import argparse
 import calendar
 import csv
@@ -36,7 +38,9 @@ import json
 import re
 import sys
 from collections import defaultdict
+from dataclasses import asdict, dataclass, field
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from typing import Dict, List, Set
 
 ALIASES = {
     "debtor": ["contact", "contactname", "customer", "customer name", "client", "debtor", "company", "name", "account"],
@@ -95,19 +99,26 @@ def money(s):
 
 
 def parse_date(s, month_first):
+    try:
+        return _parse_date(s, month_first)
+    except ValueError:
+        raise ValueError(f"unrecognised date '{s}'") from None
+
+
+def _parse_date(s, month_first):
     if not s or not str(s).strip():
         return None
     t = str(s).strip().split("T")[0].split(" ")[0] if re.match(r"\d{4}-", str(s).strip()) else str(s).strip()
     m = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})", t)
     if m:
         return dt.date(int(m[1]), int(m[2]), int(m[3]))
-    m = re.fullmatch(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})", t)
+    m = re.fullmatch(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})", t)
     if m:
         a, b, y = int(m[1]), int(m[2]), int(m[3])
         y = y + 2000 if y < 100 else y
         d, mo = (b, a) if month_first else (a, b)
         return dt.date(y, mo, d)
-    m = re.fullmatch(r"(\d{1,2})[ -]([A-Za-z]{3})[A-Za-z]*[ ,-]*(\d{2,4})", t)
+    m = re.fullmatch(r"(\d{1,2})[ -]([A-Za-z]{3})[A-Za-z]*[ ,-]*(\d{4}|\d{2})", t)
     if m and m[2].lower() in MONTHS:
         y = int(m[3])
         y = y + 2000 if y < 100 else y
@@ -145,6 +156,55 @@ def fmt(v):
     return f"{v.quantize(Decimal('0.01'), ROUND_HALF_UP):,.2f}"
 
 
+@dataclass
+class Invoice:
+    debtor: str
+    invoice: str
+    email: str
+    due: str
+    days_overdue: int
+    bucket: str
+    amount: Decimal
+    hold: bool
+    credit: bool
+    part_paid: bool
+
+
+@dataclass
+class Debtor:
+    buckets: Dict[str, Decimal] = field(default_factory=lambda: {b: Decimal(0) for b in BUCKETS})
+    total: Decimal = Decimal(0)
+    oldest: int = 0
+    flags: Set[str] = field(default_factory=set)
+    count: int = 0
+    email: str = ""
+
+
+def cell(row, column):
+    """Stripped text of a cell; '' when the column is absent or the cell is blank/short."""
+    if not column:
+        return ""
+    v = row.get(column)
+    return v.strip() if isinstance(v, str) else ""
+
+
+def read_rows(path):
+    try:
+        fh = sys.stdin if path == "-" else open(path, newline="", encoding="utf-8-sig")
+    except OSError as e:
+        sys.exit(f"Cannot open {path}: {e.strerror}")
+    try:
+        reader = csv.DictReader(fh)
+        header = [h for h in (reader.fieldnames or []) if h is not None]
+        rows = list(reader)
+    except (UnicodeDecodeError, csv.Error) as e:
+        sys.exit(f"Cannot read {path} as CSV: {e}")
+    finally:
+        if fh is not sys.stdin:
+            fh.close()
+    return header, rows
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("input", help="invoice CSV, or - for stdin")
@@ -158,10 +218,13 @@ def main():
         ap.add_argument(f"--{k.replace('_', '-')}-col", dest=f"{k}_col", help=f"column for {k}")
     args = ap.parse_args()
 
-    as_of = dt.date.fromisoformat(args.as_of) if args.as_of else dt.date.today()
-    fh = sys.stdin if args.input == "-" else open(args.input, newline="", encoding="utf-8-sig")
-    reader = csv.DictReader(fh)
-    header = reader.fieldnames or []
+    try:
+        as_of = dt.date.fromisoformat(args.as_of) if args.as_of else dt.date.today()
+    except ValueError:
+        ap.error(f"--as-of must be a date in YYYY-MM-DD form, got '{args.as_of}'")
+    header, data = read_rows(args.input)
+    if not header:
+        sys.exit("Input is empty: expected a CSV with a header row.")
     col = {k: find(header, k, getattr(args, f"{k}_col")) for k in ALIASES}
     if not col["debtor"]:
         sys.exit(f"No debtor/customer column found; use --debtor-col. Columns: {', '.join(header)}")
@@ -170,28 +233,27 @@ def main():
     if not (col["due_date"] or col["invoice_date"]):
         sys.exit("No due date or invoice date column found; use --due-date-col or --invoice-date-col.")
 
-    invoices, problems = [], []
-    for n, row in enumerate(reader, start=2):
-        status = (row.get(col["status"]) or "").strip().lower() if col["status"] else ""
-        if status in SKIP_STATUS:
+    invoices: List[Invoice] = []
+    problems: List[str] = []
+    for n, row in enumerate(data, start=2):
+        if cell(row, col["status"]).lower() in SKIP_STATUS:
             continue
-        if col["outstanding"] and money(row.get(col["outstanding"])) is not None:
-            amt = money(row.get(col["outstanding"]))
-        else:
-            amt = money(row.get(col["total"])) if col["total"] else None
+        paid = money(cell(row, col["paid"])) or Decimal(0)
+        amt = money(cell(row, col["outstanding"]))
+        if amt is None:
+            amt = money(cell(row, col["total"]))
             if amt is None:
-                problems.append(f"row {n}: no amount")
+                problems.append(f"row {n}: no amount" if not (cell(row, col["outstanding"]) or cell(row, col["total"]))
+                                else f"row {n}: unreadable amount")
                 continue
-            paid = (money(row.get(col["paid"])) or 0) if col["paid"] else 0
-            amt -= paid
-            amt -= money(row.get(col["credited"])) or 0 if col["credited"] else 0
+            credited = money(cell(row, col["credited"])) or Decimal(0)
+            amt = amt - paid - credited
         if amt == 0:
             continue
-        part_paid = bool(col["paid"]) and (money(row.get(col["paid"])) or 0) > 0
         try:
-            due = parse_date(row.get(col["due_date"]), args.month_first) if col["due_date"] else None
+            due = parse_date(cell(row, col["due_date"]), args.month_first)
             if due is None:
-                inv_d = parse_date(row.get(col["invoice_date"]), args.month_first) if col["invoice_date"] else None
+                inv_d = parse_date(cell(row, col["invoice_date"]), args.month_first)
                 if inv_d is None:
                     problems.append(f"row {n}: no due or invoice date")
                     continue
@@ -199,45 +261,41 @@ def main():
         except ValueError as e:
             problems.append(f"row {n}: {e}")
             continue
-        hold = col["hold"] and (row.get(col["hold"]) or "").strip().lower() in TRUTHY
         days = (as_of - due).days
-        invoices.append({
-            "debtor": (row.get(col["debtor"]) or "").strip() or "(no name)",
-            "invoice": (row.get(col["invoice"]) or "").strip() if col["invoice"] else "",
-            "email": (row.get(col["email"]) or "").strip() if col["email"] else "",
-            "due": due.isoformat(), "days_overdue": max(days, 0), "bucket": bucket(days),
-            "amount": amt, "hold": bool(hold), "credit": amt < 0, "part_paid": part_paid,
-        })
+        invoices.append(Invoice(
+            debtor=cell(row, col["debtor"]) or "(no name)", invoice=cell(row, col["invoice"]),
+            email=cell(row, col["email"]), due=due.isoformat(), days_overdue=max(days, 0), bucket=bucket(days),
+            amount=amt, hold=cell(row, col["hold"]).lower() in TRUTHY, credit=amt < 0, part_paid=paid > 0,
+        ))
 
-    debtors = defaultdict(lambda: {b: Decimal(0) for b in BUCKETS} | {"total": Decimal(0), "oldest": 0,
-                                                                         "flags": set(), "count": 0, "email": ""})
+    debtors: Dict[str, Debtor] = defaultdict(Debtor)
     totals = {b: Decimal(0) for b in BUCKETS}
     hold_total = Decimal(0)
     for inv in invoices:
-        d = debtors[inv["debtor"]]
-        d["email"] = d["email"] or inv["email"]
-        if inv["hold"]:
-            d["flags"].add("ON HOLD: disputed invoice")
-            hold_total += inv["amount"]
+        d = debtors[inv.debtor]
+        d.email = d.email or inv.email
+        if inv.hold:
+            d.flags.add("ON HOLD: disputed invoice")
+            hold_total += inv.amount
             continue
-        if inv["credit"]:
-            d["flags"].add("credit on account: apply before chasing")
-        if inv["part_paid"]:
-            d["flags"].add("part-paid: check for an arrangement")
-        d[inv["bucket"]] += inv["amount"]
-        d["total"] += inv["amount"]
-        d["count"] += 1
-        totals[inv["bucket"]] += inv["amount"]
-        if inv["amount"] > 0:
-            d["oldest"] = max(d["oldest"], inv["days_overdue"])
+        if inv.credit:
+            d.flags.add("credit on account: apply before chasing")
+        if inv.part_paid:
+            d.flags.add("part-paid: check for an arrangement")
+        d.buckets[inv.bucket] += inv.amount
+        d.total += inv.amount
+        d.count += 1
+        totals[inv.bucket] += inv.amount
+        if inv.amount > 0:
+            d.oldest = max(d.oldest, inv.days_overdue)
 
     rows = []
     for name, d in debtors.items():
-        flags = set(d["flags"])
-        if not d["email"]:
+        flags = set(d.flags)
+        if not d.email:
             flags.add("no contact email in export")
-        rows.append({"debtor": name, **{b: d[b] for b in BUCKETS}, "total": d["total"],
-                     "oldest_days": d["oldest"], "stage": stage(d["oldest"]) if d["total"] > 0 else "-",
+        rows.append({"debtor": name, **d.buckets, "total": d.total,
+                     "oldest_days": d.oldest, "stage": stage(d.oldest) if d.total > 0 else "-",
                      "flags": "; ".join(sorted(flags))})
     rows.sort(key=lambda r: (r["90+"], r["61-90"], r["31-60"], r["total"]), reverse=True)
     grand = sum(totals.values(), Decimal(0))
@@ -248,7 +306,8 @@ def main():
                                                          for k, v in r.items()} for r in rows],
                "problems": problems}
         if args.detail:
-            out["invoices"] = [{k: (str(v) if isinstance(v, Decimal) else v) for k, v in i.items()} for i in invoices]
+            out["invoices"] = [{k: (str(v) if isinstance(v, Decimal) else v) for k, v in asdict(i).items()}
+                               for i in invoices]
         json.dump(out, sys.stdout, indent=2)
         print()
         return
@@ -263,6 +322,8 @@ def main():
         return
 
     print(f"# Aged receivables as of {as_of.isoformat()}\n")
+    if not rows:
+        print("No open invoices to age.")
     print("| Bucket | Amount | Share |\n| --- | ---: | ---: |")
     for b in BUCKETS:
         share = f"{(totals[b] / grand * 100):.0f}%" if grand else "-"
@@ -279,13 +340,14 @@ def main():
     if args.detail:
         print("\n## Open invoices\n")
         print("| Debtor | Invoice | Due | Days overdue | Amount | Note |\n| --- | --- | --- | ---: | ---: | --- |")
-        for i in sorted(invoices, key=lambda x: (x["debtor"], x["due"])):
-            note = "ON HOLD" if i["hold"] else ("credit" if i["credit"] else "")
-            print(f"| {i['debtor']} | {i['invoice']} | {i['due']} | {i['days_overdue']} | {fmt(i['amount'])} | {note} |")
+        for i in sorted(invoices, key=lambda x: (x.debtor, x.due)):
+            note = "ON HOLD" if i.hold else ("credit" if i.credit else "")
+            print(f"| {i.debtor} | {i.invoice} | {i.due} | {i.days_overdue} | {fmt(i.amount)} | {note} |")
     if problems:
         print("\n## Rows not processed\n")
         for p in problems:
             print(f"- {p}")
+        print(f"{len(problems)} row(s) skipped; see 'Rows not processed'.", file=sys.stderr)
     print("\nStages are a starting point. Adjust for relationship, disputes and payments not yet reconciled.")
 
 

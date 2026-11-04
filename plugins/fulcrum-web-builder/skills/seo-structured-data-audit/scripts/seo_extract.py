@@ -142,9 +142,14 @@ def iter_nodes(data):
 
 
 def check_node(node: dict) -> tuple[list[str], list[str]]:
-    types = node["@type"] if isinstance(node["@type"], list) else [node["@type"]]
+    raw = node["@type"] if isinstance(node["@type"], list) else [node["@type"]]
+    # @type should be a string or a list of strings; anything else would crash
+    # the set lookups below, so stringify it and report it.
+    types = [t if isinstance(t, str) else json.dumps(t) for t in raw]
     missing: list[str] = []
     notes: list[str] = []
+    if any(not isinstance(t, str) for t in raw):
+        missing.append("@type must be a string or a list of strings")
     for t in types:
         key = "LocalBusiness" if t in LOCAL_BUSINESS_SUBTYPES else t
         for prop in TYPE_CHECKS.get(key, []):
@@ -158,8 +163,8 @@ def check_node(node: dict) -> tuple[list[str], list[str]]:
             notes.append("FAQPage: Google stopped showing FAQ rich results in 2026; markup gives no Google snippet")
         if t == "HowTo":
             notes.append("HowTo: Google no longer shows HowTo rich results")
-        if t == "BreadcrumbList":
-            for i, item in enumerate(node.get("itemListElement", []) or [], 1):
+        if t == "BreadcrumbList" and isinstance(node.get("itemListElement"), list):
+            for i, item in enumerate(node["itemListElement"], 1):
                 if isinstance(item, dict) and ("position" not in item or "name" not in item):
                     missing.append(f"BreadcrumbList.itemListElement[{i}] position/name")
     return types, missing + notes
@@ -168,6 +173,9 @@ def check_node(node: dict) -> tuple[list[str], list[str]]:
 def analyse(html: str, source: str, base: str | None) -> dict:
     c = Collector()
     c.feed(html)
+    c.close()
+    if c._script is not None:  # unterminated <script type="application/ld+json">
+        c.jsonld.append("".join(c._script))
     issues: list[tuple[str, str]] = []
     title = " ".join("".join(c.title_parts).split())
     descs = meta(c, "description")
@@ -317,10 +325,16 @@ def main(argv: list[str] | None = None) -> int:
     results = []
     for f in args.files:
         try:
-            html = sys.stdin.read() if f == "-" else open(f, encoding="utf-8", errors="replace").read()
+            if f == "-":
+                html = sys.stdin.read()
+            else:
+                with open(f, encoding="utf-8", errors="replace") as fh:
+                    html = fh.read()
         except OSError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 2
+        if not html.strip():
+            print(f"warning: {f} is empty", file=sys.stderr)
         results.append(analyse(html, f, args.base))
     if args.json:
         print(json.dumps(results, indent=2))

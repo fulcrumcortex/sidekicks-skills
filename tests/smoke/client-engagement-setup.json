@@ -1,0 +1,18 @@
+{"scripts": {"plugins/fulcrum-professional-services/skills/client-engagement-setup/scripts/wip_check.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["--time", "tests/fixtures/client-engagement-setup/time.csv", "--engagements", "tests/fixtures/client-engagement-setup/engagements.csv", "--date", "2026-11-06"],
+       "expect_exit": [0],
+       "expect_stdout": ["**9,590.00**", "| ENG-101 | Example Holdings Pty Ltd | fixed | 22 | 4,400.00 | 2,000.00 | 0.00 | 2,400.00 | 0.00 | 10,000.00 | 84 |", "Overrun risk: 84% of fee used at 50% complete.", "(47 days): billing cycle missed", "Retainer at 95% of monthly hours.", "Alex Chen: last entry 2026-10-20 (13 working days ago)"]},
+      {"kind": "empty", "args": ["--time", "tests/fixtures/client-engagement-setup/empty.csv", "--engagements", "tests/fixtures/client-engagement-setup/engagements.csv", "--date", "2026-11-06"],
+       "expect_exit": [0, 1], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["--time", "tests/fixtures/client-engagement-setup/missing-field.csv", "--engagements", "tests/fixtures/client-engagement-setup/engagements.csv", "--date", "2026-11-06"],
+       "expect_exit": [0, 1], "expect_stderr": ["missing columns: person"]},
+      {"kind": "edge", "args": ["--time", "tests/fixtures/client-engagement-setup/header-only.csv", "--engagements", "tests/fixtures/client-engagement-setup/engagements.csv", "--date", "2026-11-06"],
+       "expect_exit": [0], "expect_stdout": ["**0.00**"]},
+      {"kind": "edge", "args": ["--time", "tests/fixtures/client-engagement-setup/bad-rows.csv", "--engagements", "tests/fixtures/client-engagement-setup/engagements.csv", "--date", "2026-11-06"],
+       "expect_exit": [0], "expect_stdout": ["**960.00**"], "expect_stderr": ["row 3: date '02/11/2026' is not YYYY-MM-DD", "not a number: 'abc'", "hours is blank", "not a number: 'NaN'"]},
+      {"kind": "edge", "args": ["--time", "tests/fixtures/client-engagement-setup/time.csv", "--engagements", "tests/fixtures/client-engagement-setup/engagements.csv", "--date", "6/11/2026"],
+       "expect_exit": [2], "expect_stderr": ["not a YYYY-MM-DD date"]}
+    ]}}}

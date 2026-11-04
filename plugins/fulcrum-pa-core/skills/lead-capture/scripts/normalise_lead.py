@@ -11,7 +11,8 @@ Applies the rules in references/field-normalisation.md:
   - duplicate-check keys (email, phone, company domain)
 
 Input: a JSON object, a JSON array of objects, or CSV with a header row
-(--csv). Recognised keys: first_name, last_name, full_name, email, phone,
+(--csv, implied for a .csv file name). CSV headers are matched loosely
+("First Name" reads as first_name). Recognised keys: first_name, last_name, full_name, email, phone,
 mobile, company, website, abn, acn, state, postcode. Other keys pass through.
 
 Output: JSON on stdout, one result per lead with "warnings".
@@ -28,6 +29,7 @@ Examples:
 
 import argparse
 import csv
+import io
 import json
 import re
 import sys
@@ -119,6 +121,9 @@ def normalise_phone(raw, state=None):
     if re.fullmatch(r"4\d{8}", national):
         national = "0" + national
         out["warnings"].append("leading 0 was missing; assumed Australian mobile")
+    elif re.fullmatch(r"[2378]\d{8}", national):
+        national = "0" + national
+        out["warnings"].append("leading 0 was missing (often dropped by spreadsheets); assumed Australian landline")
     if re.fullmatch(r"\d{8}", national):
         st = (state or "").upper()
         if st in STATE_AREA_CODE:
@@ -382,10 +387,64 @@ def normalise_lead(lead):
     return result
 
 
+RECOGNISED = ("first_name", "last_name", "full_name", "email", "phone", "mobile", "company", "website",
+              "abn", "acn", "state", "postcode")
+
+
+def clean_key(key):
+    return re.sub(r"[\s-]+", "_", key.strip().lower())
+
+
+def read_leads(path, as_csv):
+    """Return a list of lead dicts, or exit with a message on unreadable input."""
+    name = path or "stdin"
+    try:
+        handle = open(path, newline="", encoding="utf-8-sig") if path else sys.stdin
+    except OSError as e:
+        sys.exit(f"Cannot open {path}: {e.strerror}")
+    try:
+        text = handle.read()
+    except UnicodeDecodeError:
+        sys.exit(f"Cannot read {name}: not UTF-8 text")
+    finally:
+        if handle is not sys.stdin:
+            handle.close()
+    if not text.strip():
+        sys.exit(f"No leads: {name} is empty")
+    if as_csv:
+        try:
+            rows = list(csv.DictReader(io.StringIO(text)))
+        except csv.Error as e:
+            sys.exit(f"Cannot read {name} as CSV: {e}")
+        if not rows:
+            sys.exit(f"No leads: {name} has a header row but no data rows")
+        leads = []
+        for n, row in enumerate(rows, start=2):
+            if None in row:
+                print(f"row {n}: more cells than header columns; extra cells ignored", file=sys.stderr)
+            leads.append({clean_key(k): v for k, v in row.items() if k is not None})
+        return leads
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        hint = " (use --csv for CSV input)" if "," in text.splitlines()[0] and not text.lstrip().startswith(("{", "[")) else ""
+        sys.exit(f"Cannot read {name} as JSON: {e.msg} at line {e.lineno}{hint}")
+    items = data if isinstance(data, list) else [data]
+    leads = []
+    for n, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            print(f"lead {n}: not a JSON object; skipped", file=sys.stderr)
+            continue
+        leads.append({str(k): v for k, v in item.items()})
+    if not leads:
+        sys.exit(f"No leads: {name} contains no JSON objects")
+    return leads
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("file", nargs="?", help="JSON or CSV file (default: stdin)")
-    parser.add_argument("--csv", action="store_true", help="read CSV with a header row")
+    parser.add_argument("--csv", action="store_true", help="read CSV with a header row (implied by a .csv file name)")
     parser.add_argument("--phone", help="normalise one phone number and exit")
     parser.add_argument("--state", help="state for --phone when the area code is missing")
     parser.add_argument("--abn", help="check one ABN and exit")
@@ -404,13 +463,18 @@ def main():
         print()
         return
 
-    handle = open(args.file, newline="") if args.file else sys.stdin
-    if args.csv:
-        leads = list(csv.DictReader(handle))
-    else:
-        data = json.load(handle)
-        leads = data if isinstance(data, list) else [data]
-    results = [normalise_lead({k: v for k, v in lead.items() if v not in (None, "")}) for lead in leads]
+    as_csv = args.csv or bool(args.file and args.file.lower().endswith(".csv"))
+    leads = read_leads(args.file, as_csv)
+    if not any(k in RECOGNISED for lead in leads for k in lead):
+        sys.exit("No recognised lead fields. Expected at least one of: " + ", ".join(RECOGNISED)
+                 + ". Found: " + ", ".join(sorted({k for lead in leads for k in lead})))
+    results = []
+    for lead in leads:
+        cleaned = {k: (v.strip() if isinstance(v, str) else v) for k, v in lead.items()}
+        result = normalise_lead({k: v for k, v in cleaned.items() if v not in (None, "")})
+        if not any(cleaned.get(k) not in (None, "") for k in RECOGNISED):
+            result["warnings"].append("no recognised lead fields filled in; nothing to normalise")
+        results.append(result)
     json.dump(results if len(results) != 1 else results[0], sys.stdout, indent=2)
     print()
 

@@ -1,0 +1,8 @@
+ContactName,EmailAddress,InvoiceNumber,InvoiceDate,DueDate,Total,AmountPaid,AmountCredited,Status,Disputed
+Paperbark Studio (fictional),studio@example.com,INV-3001,01/09/2026,,"$1,000.00",,100.00,AUTHORISED,
+Paperbark Studio (fictional),studio@example.com,INV-3002,05/09/2026,31/02/2026,250.00,0,0,AUTHORISED,
+Paperbark Studio (fictional),studio@example.com,INV-3003,,,300.00,0,0,AUTHORISED,
+Ironbark Plumbing (fictional),,INV-3004,10/10/2026,24/10/2026,abc,0,0,AUTHORISED,
+Ironbark Plumbing (fictional),,INV-3005,10/10/2026,24/10/2026,,,,AUTHORISED,
+Ironbark Plumbing (fictional)
+,orphan@example.com,INV-3006,10/10/2026,24/10/2026,120.00,0,0,AUTHORISED,,extra,cells

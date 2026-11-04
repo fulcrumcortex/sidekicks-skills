@@ -13,6 +13,7 @@ Produces one `theme.css` that every component draws from: primitives hold raw va
 - A codebase with scattered hex values, arbitrary values (`text-[#3b3b3b]`, `p-[18px]`) or two competing button styles.
 - Adding dark mode, rebranding, or upgrading a Tailwind v3 `tailwind.config.js` theme to v4 `@theme`.
 - Not for: page layout and sections (`landing-page-build`), auditing a finished page for contrast and other WCAG issues (`accessibility-audit`), or aesthetic direction (`anti-slop-design-review`).
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

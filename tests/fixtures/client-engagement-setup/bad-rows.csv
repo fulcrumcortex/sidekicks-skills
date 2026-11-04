@@ -1,0 +1,8 @@
+date,engagement,person,hours,rate,billed,billable,task
+2026-11-02,ENG-101,Alex Chen,3,200,N,Y,Drafting,extra cell
+02/11/2026,ENG-101,Alex Chen,3,200,N,Y,Drafting
+2026-11-03,ENG-101,Alex Chen,abc,200,N,Y,Drafting
+2026-11-03,ENG-101,Alex Chen,,200,N,Y,Drafting
+2026-11-04,,Alex Chen,2,200,N,Y,Drafting
+2026-11-04,ENG-102,Sam Lee,1.5,NaN,N,Y,Review
+2026-11-05,ENG-102,Sam Lee,2,180

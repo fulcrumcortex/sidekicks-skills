@@ -19,6 +19,8 @@ Examples:
       --dncr-registered wash_registered.csv --wash-date 2026-11-01 --consent-col consent
 """
 
+from __future__ import annotations
+
 import argparse
 import csv
 import datetime as dt
@@ -50,6 +52,10 @@ def normalise(raw):
         return "", "invalid"
     plus = s.startswith("+")
     digits = re.sub(r"\D", "", s)
+    if digits.startswith("0011"):  # Australian international access code
+        digits, plus = digits[4:], True
+    if digits.startswith("610") and len(digits) == 12:
+        digits = "61" + digits[3:]  # +61 (0)4..., the (0) is not dialled
     if plus and not digits.startswith("61"):
         return "+" + digits, "international"
     if digits.startswith("0061"):
@@ -93,15 +99,27 @@ def tz_group(state):
     return STATE_TO_TZ.get(state, "unknown")
 
 
-def numbers_in_file(path):
+def numbers_in_file(path, label):
     found = set()
-    with open(path, newline="", encoding="utf-8-sig") as fh:
-        for line in fh:
-            for token in re.findall(r"\+?[\d][\d\s().-]{5,}\d", line):
-                e164, kind = normalise(token)
-                if kind != "invalid":
-                    found.add(e164)
+    try:
+        with open(path, newline="", encoding="utf-8-sig") as fh:
+            for line in fh:
+                for token in re.findall(r"\+?[\d][\d\s().-]{5,}\d", line):
+                    e164, kind = normalise(token)
+                    if kind != "invalid":
+                        found.add(e164)
+    except OSError as e:
+        sys.exit(f"Cannot open {label} file {path}: {e.strerror}")
+    except UnicodeDecodeError:
+        sys.exit(f"Cannot read {label} file {path}: not UTF-8 text")
     return found
+
+
+def iso_date(value):
+    try:
+        return dt.date.fromisoformat(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected YYYY-MM-DD, got '{value}'") from None
 
 
 def pick(header, wanted, aliases):
@@ -124,15 +142,27 @@ def main():
     ap.add_argument("--consent-col", help="column holding recorded consent (yes/true/express/inferred count as consent)")
     ap.add_argument("--suppress", action="append", default=[], help="file of numbers never to call (repeatable)")
     ap.add_argument("--dncr-registered", help="numbers the user's own Register wash returned as registered")
-    ap.add_argument("--wash-date", help="date of the user's wash, YYYY-MM-DD")
-    ap.add_argument("--as-of", help="planned call date, YYYY-MM-DD (default today)")
+    ap.add_argument("--wash-date", type=iso_date, help="date of the user's wash, YYYY-MM-DD")
+    ap.add_argument("--as-of", type=iso_date, help="planned call date, YYYY-MM-DD (default today)")
     ap.add_argument("--out", help="write cleaned CSV here instead of stdout")
     args = ap.parse_args()
 
-    as_of = dt.date.fromisoformat(args.as_of) if args.as_of else dt.date.today()
-    fh = sys.stdin if args.input == "-" else open(args.input, newline="", encoding="utf-8-sig")
-    reader = csv.DictReader(fh)
-    header = reader.fieldnames or []
+    as_of = args.as_of or dt.date.today()
+    try:
+        fh = sys.stdin if args.input == "-" else open(args.input, newline="", encoding="utf-8-sig")
+    except OSError as e:
+        sys.exit(f"Cannot open {args.input}: {e.strerror}")
+    try:
+        reader = csv.DictReader(fh)
+        header = [h for h in (reader.fieldnames or []) if h is not None]
+        rows = list(reader)
+    except (UnicodeDecodeError, csv.Error) as e:
+        sys.exit(f"Cannot read {args.input} as CSV: {e}")
+    finally:
+        if fh is not sys.stdin:
+            fh.close()
+    if not header:
+        sys.exit("Input is empty: expected a call list CSV with a header row.")
     phone_col = pick(header, args.phone_col, PHONE_ALIASES)
     if not phone_col:
         sys.exit(f"No phone column found. Use --phone-col. Columns: {', '.join(header)}")
@@ -141,16 +171,19 @@ def main():
 
     suppressed = set()
     for path in args.suppress:
-        suppressed |= numbers_in_file(path)
-    registered = numbers_in_file(args.dncr_registered) if args.dncr_registered else None
+        suppressed |= numbers_in_file(path, "suppression")
+    registered = numbers_in_file(args.dncr_registered, "Register wash") if args.dncr_registered else None
 
     out_rows, seen = [], set()
     reasons, groups = Counter(), Counter()
-    for row in reader:
-        e164, kind = normalise(row.get(phone_col, ""))
-        state = state_from(row.get(state_col, "") if state_col else "", e164, kind)
+    extra_cells = 0
+    for row in rows:
+        if row.pop(None, None) is not None:
+            extra_cells += 1
+        e164, kind = normalise(row.get(phone_col))
+        state = state_from((row.get(state_col) or "") if state_col else "", e164, kind)
         group = tz_group(state)
-        consent = consent_col and str(row.get(consent_col, "")).strip().lower() in TRUTHY
+        consent = bool(consent_col) and (row.get(consent_col) or "").strip().lower() in TRUTHY
         status, reason = "ok", ""
         if kind == "invalid":
             status, reason = "excluded", "invalid number"
@@ -175,8 +208,11 @@ def main():
         row.update({"phone_e164": e164, "tz_group": group, "status": status, "reason": reason})
         out_rows.append(row)
 
-    fields = header + [c for c in ("phone_e164", "tz_group", "status", "reason") if c not in header]
-    out = open(args.out, "w", newline="", encoding="utf-8") if args.out else sys.stdout
+    fields = list(header) + [c for c in ("phone_e164", "tz_group", "status", "reason") if c not in header]
+    try:
+        out = open(args.out, "w", newline="", encoding="utf-8") if args.out else sys.stdout
+    except OSError as e:
+        sys.exit(f"Cannot write {args.out}: {e.strerror}")
     writer = csv.DictWriter(out, fieldnames=fields)
     writer.writeheader()
     writer.writerows(out_rows)
@@ -189,6 +225,10 @@ def main():
     err = sys.stderr
     print("\n== Call list summary ==", file=err)
     print(f"Rows: {total}  ok: {ok}  review: {review}  excluded: {total - ok - review}", file=err)
+    if not total:
+        print("No data rows in the call list.", file=err)
+    if extra_cells:
+        print(f"WARNING: {extra_cells} row(s) had more cells than the header; extra cells were dropped.", file=err)
     for reason, n in reasons.most_common():
         print(f"  {reason}: {n}", file=err)
     print("Ready rows by time-zone group:", file=err)
@@ -203,12 +243,14 @@ def main():
         print("BLOCK: no Do Not Call Register wash result supplied. Telemarketing calls must wait until the user "
               "washes the list (this script does not wash).", file=err)
     if args.wash_date:
-        age = (as_of - dt.date.fromisoformat(args.wash_date)).days
-        if age > WASH_VALID_DAYS:
+        age = (as_of - args.wash_date).days
+        if age < 0:
+            print(f"BLOCK: wash date {args.wash_date} is after the call date {as_of}. Check both dates.", file=err)
+        elif age > WASH_VALID_DAYS:
             print(f"BLOCK: wash is {age} days old on {as_of} (valid for {WASH_VALID_DAYS} days). Re-wash first.", file=err)
         else:
             print(f"Wash age on {as_of}: {age} days (valid until "
-                  f"{dt.date.fromisoformat(args.wash_date) + dt.timedelta(days=WASH_VALID_DAYS)}).", file=err)
+                  f"{args.wash_date + dt.timedelta(days=WASH_VALID_DAYS)}).", file=err)
     elif registered is not None:
         print("FIX: supply --wash-date so wash validity can be checked.", file=err)
 

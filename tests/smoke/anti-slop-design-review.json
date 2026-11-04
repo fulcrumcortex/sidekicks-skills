@@ -1,0 +1,17 @@
+{"scripts": {"plugins/fulcrum-web-builder/skills/anti-slop-design-review/scripts/slop_scan.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["tests/fixtures/anti-slop-design-review/sloppy"], "expect_exit": [0],
+     "expect_stdout": ["scanned 2 files", "4 purple/indigo gradient uses", "2 placeholder content strings", "6 hype words in source", "3 emoji in markup across 1 files"]},
+    {"kind": "empty", "args": ["tests/fixtures/anti-slop-design-review/empty.tsx"], "expect_exit": [0],
+     "expect_stdout": ["scanned 1 files", "no strong template signals found"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/anti-slop-design-review/no-source"], "expect_exit": [2],
+     "expect_stderr": ["no source files found"]},
+    {"kind": "edge", "args": ["tests/fixtures/anti-slop-design-review/clean"], "expect_exit": [0],
+     "expect_stdout": ["scanned 2 files", "no strong template signals found"]},
+    {"kind": "edge", "args": ["tests/fixtures/anti-slop-design-review/sloppy", "--json"], "expect_exit": [0],
+     "expect_stdout": ["\"purple_blue_gradient\": 4", "\"hype_copy\": 6", "\"sparkle_icons\": 4"]},
+    {"kind": "edge", "args": ["{tmp}/does-not-exist"], "expect_exit": [2],
+     "expect_stderr": ["path not found", "no source files found"]}
+  ]}}}

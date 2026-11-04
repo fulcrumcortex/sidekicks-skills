@@ -1,0 +1,22 @@
+{"scripts": {"plugins/fulcrum-web-builder/skills/design-tokens/scripts/contrast_check.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["#000000", "#FFFFFF"], "expect_exit": [0],
+     "expect_stdout": ["21.00:1", "1 pair(s) checked, 0 failing AA"]},
+    {"kind": "sample", "args": ["--pairs", "plugins/fulcrum-web-builder/skills/design-tokens/assets/contrast-pairs.csv", "--css", "plugins/fulcrum-web-builder/skills/design-tokens/assets/theme.css"], "expect_exit": [0],
+     "expect_stdout": ["body text on canvas                          text    19.10:1", "input border on canvas                       ui       4.19:1", "12 pair(s) checked, 0 failing AA (light scope)"]},
+    {"kind": "sample", "args": ["--pairs", "plugins/fulcrum-web-builder/skills/design-tokens/assets/contrast-pairs.csv", "--css", "plugins/fulcrum-web-builder/skills/design-tokens/assets/theme.css", "--scope", "dark"], "expect_exit": [0],
+     "expect_stdout": ["body text on canvas                          text    18.24:1", "12 pair(s) checked, 0 failing AA (dark scope)"]},
+    {"kind": "empty", "args": ["--pairs", "tests/fixtures/design-tokens/empty.csv"], "expect_exit": [2],
+     "expect_stderr": ["file is empty"]},
+    {"kind": "missing-field", "args": ["--pairs", "tests/fixtures/design-tokens/missing-field.csv"], "expect_exit": [2],
+     "expect_stderr": ["missing required column(s): fg, bg"]},
+    {"kind": "edge", "args": ["--pairs", "tests/fixtures/design-tokens/header-only.csv"], "expect_exit": [0],
+     "expect_stdout": ["no pairs to check"]},
+    {"kind": "edge", "args": ["--pairs", "tests/fixtures/design-tokens/bad-rows.csv"], "expect_exit": [2],
+     "expect_stdout": ["mid grey on white                            text     4.54:1", "bare-number hsl grey                         large    4.42:1", "3 pair(s) checked, 0 failing AA, 3 skipped with errors"],
+     "expect_stderr": ["line 3: blank fg or bg", "got 'huge'", "bad hex colour: #zzzzzz"]},
+    {"kind": "edge", "args": ["#777777", "#ffffff", "--suggest"], "expect_exit": [1],
+     "expect_stdout": ["4.48:1  FAIL", "oklch("]}
+  ]}}}

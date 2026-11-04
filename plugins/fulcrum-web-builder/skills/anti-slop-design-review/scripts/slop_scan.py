@@ -89,8 +89,10 @@ def scan(roots: list[str], exclude: set[str]) -> dict:
     clamp_type = 0
     for path in iter_files(roots, exclude):
         try:
-            text = open(path, encoding="utf-8", errors="replace").read()
-        except OSError:
+            with open(path, encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError as exc:
+            print(f"warning: skipped {path}: {exc.strerror or exc}", file=sys.stderr)
             continue
         files += 1
         for key, (rx, _) in SIGNALS.items():
@@ -183,9 +185,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--exclude", default=",".join(sorted(DEFAULT_EXCLUDE)), help="comma-separated folder names to skip")
     ap.add_argument("--json", action="store_true", help="print JSON")
     args = ap.parse_args(argv)
+    for p in args.paths:
+        if not os.path.exists(p):
+            print(f"warning: path not found: {p}", file=sys.stderr)
     r = scan(args.paths, {x.strip() for x in args.exclude.split(",") if x.strip()})
     if not r["files"]:
-        print("error: no source files found", file=sys.stderr)
+        print(f"error: no source files found (looked for {', '.join(sorted(EXTS))})", file=sys.stderr)
         return 2
     f = findings(r)
     if args.json:

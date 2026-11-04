@@ -21,10 +21,13 @@ Example:
   python3 renewal_stage.py --policies renewals.csv --date 2026-11-05
 """
 
+from __future__ import annotations
+
 import argparse
 import csv
 import datetime as dt
 import sys
+from typing import Any
 
 STAGES = [
     ("upcoming", 61, 10**6),
@@ -48,19 +51,19 @@ MIN_GAP = {"D-60": 5, "D-30": 4, "D-14": 3, "D-7": 2, "expired": 0, "upcoming": 
 FINAL = {"instructed", "renewed", "lapsed", "cancelled"}
 
 
-def yes(v):
+def yes(v: str | None) -> bool:
     return (v or "").strip().lower() in ("y", "yes", "true", "1")
 
 
-def stage_for(days):
+def stage_for(days: int) -> str:
     for name, lo, hi in STAGES:
         if lo <= days <= hi:
             return name
     return "upcoming"
 
 
-def channels(row):
-    out = []
+def channels(row: dict[str, str]) -> list[str]:
+    out: list[str] = []
     if not yes(row.get("email_opt_out")):
         out.append("email")
     if not yes(row.get("sms_opt_out")):
@@ -70,11 +73,41 @@ def channels(row):
     return out
 
 
-def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
+def iso_date(raw: str) -> dt.date:
+    try:
+        return dt.date.fromisoformat(raw)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a YYYY-MM-DD date: {raw!r}") from None
+
+
+def read_policies(path: str) -> list[tuple[int, dict[str, str]]]:
+    """Return (line number, row) pairs with lower-cased keys; cells beyond the header are ignored."""
+    try:
+        with open(path, newline="", encoding="utf-8-sig") as fh:
+            reader = csv.DictReader(fh)
+            headers = {h.strip().lower() for h in (reader.fieldnames or []) if h}
+            if not headers:
+                raise SystemExit(f"Policies file {path} is empty: expected a header row with policy, client, expiry")
+            missing = [c for c in ("policy", "client", "expiry") if c not in headers]
+            if missing:
+                raise SystemExit(f"Policies file is missing columns: {', '.join(missing)}")
+            rows: list[tuple[int, dict[str, str]]] = []
+            for r in reader:
+                clean = {k.strip().lower(): (v or "").strip() for k, v in r.items() if isinstance(k, str)}
+                if any(clean.values()):
+                    rows.append((reader.line_num, clean))
+            return rows
+    except FileNotFoundError:
+        raise SystemExit(f"Policies file not found: {path}") from None
+    except (OSError, UnicodeDecodeError, csv.Error) as exc:
+        raise SystemExit(f"Policies file {path} could not be read: {exc}") from None
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(description=(__doc__ or "").split("\n\n")[0],
                                 epilog="Run with --columns for the expected CSV columns.")
     p.add_argument("--policies", help="Policies CSV")
-    p.add_argument("--date", help="Today's date YYYY-MM-DD (default today)")
+    p.add_argument("--date", type=iso_date, help="Today's date YYYY-MM-DD (default today)")
     p.add_argument("--columns", action="store_true", help="Print the expected CSV columns and exit")
     args = p.parse_args(argv)
     if args.columns:
@@ -82,32 +115,26 @@ def main(argv=None):
         return 0
     if not args.policies:
         p.error("--policies is required")
-    today = dt.date.fromisoformat(args.date) if args.date else dt.date.today()
+    today: dt.date = args.date or dt.date.today()
+    rows = read_policies(args.policies)
 
-    try:
-        with open(args.policies, newline="", encoding="utf-8-sig") as fh:
-            reader = csv.DictReader(fh)
-            headers = {h.strip().lower() for h in (reader.fieldnames or []) if h}
-            missing = [c for c in ("policy", "client", "expiry") if c not in headers]
-            if missing:
-                raise SystemExit(f"Policies file is missing columns: {', '.join(missing)}")
-            rows = [{(k or "").strip().lower(): (v or "").strip() for k, v in r.items()} for r in reader]
-    except FileNotFoundError:
-        raise SystemExit(f"Policies file not found: {args.policies}")
-
-    due, waiting, closed, problems = [], [], [], []
-    for i, r in enumerate(rows, start=2):
-        if not any(r.values()):
+    due: list[dict[str, Any]] = []
+    waiting: list[dict[str, Any]] = []
+    closed: list[dict[str, Any]] = []
+    problems: list[str] = []
+    for i, r in rows:
+        if not r["policy"]:
+            problems.append(f"Row {i}: policy number is blank; row skipped")
             continue
         try:
             expiry = dt.date.fromisoformat(r["expiry"])
         except ValueError:
-            problems.append(f"Row {i} ({r.get('policy', '?')}): expiry '{r['expiry']}' is not YYYY-MM-DD")
+            problems.append(f"Row {i} ({r['policy']}): expiry '{r['expiry']}' is not YYYY-MM-DD; row skipped")
             continue
         status = (r.get("status") or "open").lower()
         days = (expiry - today).days
         stage = stage_for(days)
-        entry = {"policy": r["policy"], "client": r["client"], "class": r.get("class", ""),
+        entry: dict[str, Any] = {"policy": r["policy"], "client": r["client"], "class": r.get("class", ""),
                  "expiry": expiry, "days": days, "stage": stage}
         if status in FINAL:
             entry["note"] = f"status {status}: no further renewal reminders"
@@ -165,6 +192,9 @@ def main(argv=None):
         print("\n## Data problems\n")
         for pr in problems:
             print(f"- {pr}")
+            print(f"warning: {pr}", file=sys.stderr)
+    if not rows:
+        print("\nNo policies in the file: nothing to schedule.")
     return 0
 
 

@@ -13,6 +13,7 @@ Finds what stops search engines from crawling, understanding and presenting a si
 - Traffic dropped, pages are missing from Google, or snippets look wrong.
 - A local business wants its name, address and phone consistent and its LocalBusiness markup right.
 - Not for: page speed (`core-web-vitals-pass`), copy rewriting (`conversion-copy-review`), or accessibility (`accessibility-audit`), although alt text and headings overlap.
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

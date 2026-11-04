@@ -7,7 +7,8 @@ Reads a CSV export of deals and prints:
   2. a best / likely / worst forecast for the period
   3. an action list per owner, highest value first
 
-CSV columns (header names, case-insensitive; only the first five are required):
+CSV columns (header names, case-insensitive; owner, stage, amount and one of
+deal_id or name are required):
   deal_id, name, owner, stage, amount,
   probability        percent; blank = stage default
   expected_close     ISO (2026-11-30) or Australian (30/11/2026) date
@@ -18,6 +19,9 @@ CSV columns (header names, case-insensitive; only the first five are required):
   close_date_changes number of times the expected close date moved
   status             open (default), won or lost
   closed_date        date won or lost
+
+Rows with a blank stage or an unreadable date, amount, probability or count
+are listed under "Rows skipped" and left out of the review.
 
 Options let you set the review date, the forecast period and a JSON config
 that overrides stage probabilities and stale thresholds, for example:
@@ -30,6 +34,8 @@ Examples:
   python3 pipeline_review.py deals.csv --period 2026-11-01:2026-12-31 --target 120000
   python3 pipeline_review.py deals.csv --format json
 """
+
+from __future__ import annotations
 
 import argparse
 import csv
@@ -83,7 +89,35 @@ def parse_date(value):
 def parse_amount(value):
     if value is None or not str(value).strip():
         return None
-    return float(re.sub(r"[^\d.\-]", "", str(value)) or 0)
+    text = str(value).strip()
+    cleaned = re.sub(r"[^\d.\-]", "", text)
+    try:
+        return float(cleaned)
+    except ValueError:
+        raise ValueError(f"unreadable amount {text!r}") from None
+
+
+def parse_probability(value):
+    text = str(value).strip().rstrip("%").strip()
+    try:
+        prob = float(text)
+    except ValueError:
+        raise ValueError(f"unreadable probability {value!r}; use a percent such as 40") from None
+    if not 0 <= prob <= 100:
+        raise ValueError(f"probability {value!r} is outside 0-100")
+    return prob
+
+
+def parse_count(value):
+    if not value:
+        return 0
+    try:
+        number = float(value)
+    except ValueError:
+        raise ValueError(f"unreadable close_date_changes {value!r}") from None
+    if number < 0 or number != int(number):
+        raise ValueError(f"close_date_changes must be a whole number, got {value!r}")
+    return int(number)
 
 
 def stage_rule(stage, overrides):
@@ -100,79 +134,102 @@ def money(x):
 
 
 def review(rows, as_of, period, overrides):
-    deals = []
-    for raw in rows:
+    deals, problems = [], []
+    for n, raw in enumerate(rows, start=2):
         row = {k.strip().lower(): (v or "").strip() for k, v in raw.items() if k}
-        stage = row.get("stage", "")
-        rule = stage_rule(stage, overrides)
-        status = (row.get("status") or "open").lower()
-        if "won" in stage.lower():
-            status = "won"
-        elif "lost" in stage.lower():
-            status = "lost"
-        prob = float(row["probability"]) if row.get("probability") else float(rule[1])
-        d = {
-            "id": row.get("deal_id") or row.get("id") or row.get("name"),
-            "name": row.get("name", "?"),
-            "owner": row.get("owner") or "Unassigned",
-            "stage": stage,
-            "status": status,
-            "amount": parse_amount(row.get("amount")),
-            "probability": prob,
-            "stage_probability": rule[1],
-            "expected_close": parse_date(row.get("expected_close")),
-            "last_activity": parse_date(row.get("last_activity")),
-            "next_step": row.get("next_step", ""),
-            "next_step_due": parse_date(row.get("next_step_due")),
-            "stage_entered": parse_date(row.get("stage_entered")),
-            "pushes": int(row.get("close_date_changes") or 0),
-            "closed_date": parse_date(row.get("closed_date")),
-            "flags": [],
-            "details": [],
-        }
-        if status == "open":
-            flags, details = d["flags"], d["details"]
-            stale_days, stuck_days = rule[2], rule[3]
-            if d["last_activity"] is None:
-                flags.append("STALE")
-                details.append("no activity on record")
-            elif stale_days is not None:
-                idle = (as_of - d["last_activity"]).days
-                d["idle_days"] = idle
-                if idle > stale_days:
-                    flags.append("STALE")
-                    details.append(f"no activity {idle}d (limit {stale_days}d)")
-            if stuck_days and d["stage_entered"]:
-                in_stage = (as_of - d["stage_entered"]).days
-                if in_stage > stuck_days:
-                    flags.append("STUCK")
-                    details.append(f"{in_stage}d in stage (limit {stuck_days}d)")
-            if not d["next_step"]:
-                flags.append("NO_NEXT_STEP")
-            elif d["next_step_due"] and d["next_step_due"] < as_of:
-                flags.append("NEXT_STEP_OVERDUE")
-                details.append(f"next step due {d['next_step_due']:%d %b}")
-            if d["expected_close"] is None:
-                flags.append("MISSING_CLOSE")
-            elif d["expected_close"] < as_of:
-                flags.append("PAST_CLOSE")
-                details.append(f"close date {d['expected_close']:%d %b} passed")
-            elif d["expected_close"] > as_of + timedelta(days=365):
-                flags.append("CLOSE_TOO_FAR")
-            if d["pushes"] >= 2:
-                flags.append("PUSHED")
-                details.append(f"close date moved {d['pushes']}x")
-            if d["amount"] in (None, 0):
-                flags.append("MISSING_AMOUNT")
-            if d["owner"] == "Unassigned":
-                flags.append("NO_OWNER")
-            if abs(d["probability"] - d["stage_probability"]) >= 20:
-                flags.append("PROB_MISMATCH")
-                details.append(f"{d['probability']:.0f}% vs stage {d['stage_probability']}%")
-            d["dead"] = bool(stale_days and d.get("idle_days", 10**6) > 2 * stale_days) or \
-                d["last_activity"] is None and d["pushes"] >= 2
+        if not any(row.values()):
+            continue
+        label = row.get("deal_id") or row.get("name") or "(unnamed)"
+        try:
+            d, rule = parse_deal(row, overrides)
+        except ValueError as exc:
+            problems.append(f"row {n} ({label}): {exc}")
+            continue
+        flag_deal(d, rule, as_of)
         deals.append(d)
+    return summarise(deals, problems, as_of, period)
 
+
+def parse_deal(row, overrides):
+    """Turn one CSV row into a deal dict, or raise ValueError naming the bad field."""
+    stage = row.get("stage", "")
+    if not stage:
+        raise ValueError("no stage")
+    rule = stage_rule(stage, overrides)
+    status = (row.get("status") or "open").lower()
+    if "won" in stage.lower():
+        status = "won"
+    elif "lost" in stage.lower():
+        status = "lost"
+    prob = parse_probability(row["probability"]) if row.get("probability") else float(rule[1])
+    d = {
+        "id": row.get("deal_id") or row.get("id") or row.get("name"),
+        "name": row.get("name", "?"),
+        "owner": row.get("owner") or "Unassigned",
+        "stage": stage,
+        "status": status,
+        "amount": parse_amount(row.get("amount")),
+        "probability": prob,
+        "stage_probability": rule[1],
+        "expected_close": parse_date(row.get("expected_close")),
+        "last_activity": parse_date(row.get("last_activity")),
+        "next_step": row.get("next_step", ""),
+        "next_step_due": parse_date(row.get("next_step_due")),
+        "stage_entered": parse_date(row.get("stage_entered")),
+        "pushes": parse_count(row.get("close_date_changes")),
+        "closed_date": parse_date(row.get("closed_date")),
+        "flags": [],
+        "details": [],
+    }
+    return d, rule
+
+
+def flag_deal(d, rule, as_of):
+    """Add hygiene flags and details to an open deal, in place."""
+    if d["status"] == "open":
+        flags, details = d["flags"], d["details"]
+        stale_days, stuck_days = rule[2], rule[3]
+        if d["last_activity"] is None:
+            flags.append("STALE")
+            details.append("no activity on record")
+        elif stale_days is not None:
+            idle = (as_of - d["last_activity"]).days
+            d["idle_days"] = idle
+            if idle > stale_days:
+                flags.append("STALE")
+                details.append(f"no activity {idle}d (limit {stale_days}d)")
+        if stuck_days and d["stage_entered"]:
+            in_stage = (as_of - d["stage_entered"]).days
+            if in_stage > stuck_days:
+                flags.append("STUCK")
+                details.append(f"{in_stage}d in stage (limit {stuck_days}d)")
+        if not d["next_step"]:
+            flags.append("NO_NEXT_STEP")
+        elif d["next_step_due"] and d["next_step_due"] < as_of:
+            flags.append("NEXT_STEP_OVERDUE")
+            details.append(f"next step due {d['next_step_due']:%d %b}")
+        if d["expected_close"] is None:
+            flags.append("MISSING_CLOSE")
+        elif d["expected_close"] < as_of:
+            flags.append("PAST_CLOSE")
+            details.append(f"close date {d['expected_close']:%d %b} passed")
+        elif d["expected_close"] > as_of + timedelta(days=365):
+            flags.append("CLOSE_TOO_FAR")
+        if d["pushes"] >= 2:
+            flags.append("PUSHED")
+            details.append(f"close date moved {d['pushes']}x")
+        if d["amount"] in (None, 0):
+            flags.append("MISSING_AMOUNT")
+        if d["owner"] == "Unassigned":
+            flags.append("NO_OWNER")
+        if abs(d["probability"] - d["stage_probability"]) >= 20:
+            flags.append("PROB_MISMATCH")
+            details.append(f"{d['probability']:.0f}% vs stage {d['stage_probability']}%")
+        d["dead"] = bool(stale_days and d.get("idle_days", 10**6) > 2 * stale_days) or \
+            d["last_activity"] is None and d["pushes"] >= 2
+
+
+def summarise(deals, problems, as_of, period):
     # Forecast
     start, end = period
     in_period = lambda dt: dt is not None and start <= dt <= end
@@ -235,6 +292,7 @@ def review(rows, as_of, period, overrides):
                      "concentration": concentration},
         "deals": deals,
         "actions": actions,
+        "problems": problems,
     }
 
 
@@ -273,6 +331,10 @@ def print_text(result, target):
         print("\nNEEDS A NEW CLOSE DATE (close date passed before this period; left out of the forecast)")
         for d in earlier:
             print(f"  - {d['name']} ({d['owner']}): was {d['expected_close']:%d %b %Y}")
+    if result["problems"]:
+        print("\nROWS SKIPPED (fix in the CRM export and re-run)")
+        for problem in result["problems"]:
+            print(f"  - {problem}")
     print("\nACTIONS BY OWNER")
     for owner, items in sorted(result["actions"].items()):
         print(f"\n{owner}")
@@ -293,27 +355,83 @@ def main():
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args()
 
-    as_of = parse_date(args.as_of) if args.as_of else date.today()
-    if args.period:
-        a, b = args.period.split(":")
-        period = (parse_date(a), parse_date(b))
-    else:
-        first = as_of.replace(day=1)
-        nxt = (first + timedelta(days=32)).replace(day=1)
-        period = (first, nxt - timedelta(days=1))
-    overrides = {}
-    if args.config:
-        overrides = json.load(open(args.config)).get("stages", {})
-    handle = open(args.csv, newline="") if args.csv else sys.stdin
     try:
-        result = review(list(csv.DictReader(handle)), as_of, period, overrides)
-    except (ValueError, KeyError) as exc:
-        sys.exit(f"error: {exc}")
+        as_of = parse_date(args.as_of) if args.as_of else date.today()
+        if as_of is None:
+            raise ValueError("--as-of is blank; use YYYY-MM-DD")
+        period = parse_period(args.period, as_of)
+    except ValueError as exc:
+        parser.error(str(exc))
+    overrides = load_config(args.config) if args.config else {}
+    rows = read_rows(args.csv)
+    result = review(rows, as_of, period, overrides)
+    for problem in result["problems"]:
+        print(f"skipped {problem}", file=sys.stderr)
     if args.format == "json":
         json.dump(result, sys.stdout, indent=2, default=str)
         print()
     else:
         print_text(result, args.target)
+
+
+def parse_period(text, as_of):
+    if not text:
+        first = as_of.replace(day=1)
+        nxt = (first + timedelta(days=32)).replace(day=1)
+        return first, nxt - timedelta(days=1)
+    parts = text.split(":")
+    if len(parts) != 2:
+        raise ValueError(f"--period must be START:END, got {text!r}")
+    start, end = parse_date(parts[0]), parse_date(parts[1])
+    if start is None or end is None:
+        raise ValueError(f"--period needs both a start and an end date, got {text!r}")
+    if end < start:
+        raise ValueError(f"--period ends before it starts: {text!r}")
+    return start, end
+
+
+def load_config(path):
+    try:
+        with open(path, encoding="utf-8-sig") as fh:
+            config = json.load(fh)
+    except OSError as exc:
+        sys.exit(f"error: cannot open config {path}: {exc.strerror}")
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        sys.exit(f"error: config {path} is not valid JSON: {exc}")
+    stages = config.get("stages", {}) if isinstance(config, dict) else None
+    if not isinstance(stages, dict) or not all(isinstance(v, dict) for v in stages.values()):
+        sys.exit('error: config must look like {"stages": {"Stage name": {"probability": 30, "stale_days": 10}}}')
+    for name, rule in stages.items():
+        for key, value in rule.items():
+            if key in ("probability", "stale_days", "stuck_days") and not (
+                    value is None or (isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0)):
+                sys.exit(f"error: config stage {name!r}: {key} must be a non-negative number, got {value!r}")
+    return stages
+
+
+def read_rows(path):
+    name = path or "stdin"
+    try:
+        handle = open(path, newline="", encoding="utf-8-sig") if path else sys.stdin
+    except OSError as exc:
+        sys.exit(f"error: cannot open {path}: {exc.strerror}")
+    try:
+        reader = csv.DictReader(handle)
+        header = {h.strip().lower() for h in (reader.fieldnames or []) if h}
+        rows = list(reader)
+    except (UnicodeDecodeError, csv.Error) as exc:
+        sys.exit(f"error: cannot read {name} as CSV: {exc}")
+    finally:
+        if handle is not sys.stdin:
+            handle.close()
+    if not header:
+        sys.exit(f"error: {name} is empty; expected a deals CSV with a header row")
+    missing = [c for c in ("owner", "stage", "amount") if c not in header]
+    if not header & {"deal_id", "id", "name"}:
+        missing.insert(0, "deal_id or name")
+    if missing:
+        sys.exit(f"error: missing required column(s): {', '.join(missing)}. Found: {', '.join(sorted(header))}")
+    return rows
 
 
 if __name__ == "__main__":

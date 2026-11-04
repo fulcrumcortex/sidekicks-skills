@@ -13,17 +13,34 @@ Checks:
   * no file contains the retired internal product name or stray hook front matter
   * every http(s) link in a Markdown file returns HTTP 200 without a redirect
     (skipped with --offline)
+  * smoke tests: every helper script under plugins/**/scripts/*.py has cases in
+    tests/smoke/*.json (help, a realistic sample, and empty and missing-field
+    input unless the script reads no input), and every case runs without a
+    traceback, exits with an expected code and prints the expected text
+    (skipped with --no-smoke)
 
 Usage:
-  python3 scripts/validate.py [--offline] [--only PATH ...]
+  python3 scripts/validate.py [--offline] [--no-smoke] [--only PATH ...]
+
+Smoke case files (tests/smoke/<skill>.json):
+  {"scripts": {"plugins/<p>/skills/<s>/scripts/x.py": {
+      "no_input": false,
+      "cases": [{"kind": "help|sample|empty|missing-field|edge",
+                 "args": ["..."], "stdin": "optional/path",
+                 "expect_exit": [0], "expect_stdout": ["text"],
+                 "expect_stderr": ["text"]}]}}}
+  Paths are relative to the repository root; "{tmp}" becomes a scratch folder.
 """
 from __future__ import annotations
 
 import argparse
 import concurrent.futures
 import json
+import os
 import re
+import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -160,7 +177,8 @@ def check_files(rep: Report, roots: list[Path]) -> set[str]:
         for pattern in BANNED:
             if pattern.search(text):
                 rep.error(f"{rel(path)}: contains banned text matching {pattern.pattern!r}")
-        if path.suffix == ".json":
+        is_fixture = "tests/fixtures/" in rel(path)  # fixtures may be deliberately malformed
+        if path.suffix == ".json" and not is_fixture:
             try:
                 json.loads(text)
                 rep.count("json files")
@@ -216,9 +234,71 @@ def check_links(rep: Report, urls: set[str]) -> None:
                 rep.error(f"link returned {status or 'no response'} (needs 200, no redirect): {url}")
 
 
+REQUIRED_KINDS = {"help", "sample"}
+INPUT_KINDS = {"empty", "missing-field"}
+
+
+def run_smoke(rep: Report) -> None:
+    scripts = {rel(p) for p in (ROOT / "plugins").rglob("scripts/*.py")}
+    covered: dict[str, dict] = {}
+    for case_file in sorted((ROOT / "tests" / "smoke").glob("*.json")):
+        try:
+            data = json.loads(case_file.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            rep.error(f"{rel(case_file)}: invalid JSON: {exc}")
+            continue
+        for script, spec in data.get("scripts", {}).items():
+            if script in covered:
+                rep.error(f"{rel(case_file)}: {script} already has cases in another file")
+            covered[script] = spec
+    for script in sorted(scripts - set(covered)):
+        rep.error(f"{script}: no smoke cases in tests/smoke/")
+    for script in sorted(set(covered) - scripts):
+        rep.error(f"tests/smoke: cases for a script that does not exist: {script}")
+    env = {k: v for k, v in os.environ.items() if not k.startswith("PYTHON")}
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    for script in sorted(scripts & set(covered)):
+        spec = covered[script]
+        cases = spec.get("cases", [])
+        kinds = {c.get("kind") for c in cases}
+        needed = REQUIRED_KINDS | (set() if spec.get("no_input") else INPUT_KINDS)
+        if needed - kinds:
+            rep.error(f"{script}: smoke cases missing kind(s): {', '.join(sorted(needed - kinds))}")
+        for i, case in enumerate(cases):
+            label = f"{script} [{case.get('kind', '?')} #{i}]"
+            with tempfile.TemporaryDirectory() as tmp:
+                args = [a.replace("{tmp}", tmp) for a in case.get("args", [])]
+                stdin_path = case.get("stdin")
+                try:
+                    stdin_bytes = (ROOT / stdin_path).read_bytes() if stdin_path else b""
+                    proc = subprocess.run([sys.executable, "-I", script, *args], cwd=ROOT, env=env,
+                                          input=stdin_bytes, capture_output=True, timeout=60)
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    rep.error(f"{label}: could not run: {exc}")
+                    continue
+            rep.count("smoke cases")
+            out = proc.stdout.decode("utf-8", "replace")
+            err = proc.stderr.decode("utf-8", "replace")
+            if "Traceback (most recent call last)" in err:
+                rep.error(f"{label}: crashed: {err.strip().splitlines()[-1]}")
+                continue
+            expected = case.get("expect_exit", [0])
+            if proc.returncode not in expected:
+                tail = (err.strip() or out.strip()).splitlines()[-1:] or [""]
+                rep.error(f"{label}: exit {proc.returncode}, expected {expected}: {tail[0][:160]}")
+            for text in case.get("expect_stdout", []):
+                if text not in out:
+                    rep.error(f"{label}: stdout lacks {text!r}")
+            for text in case.get("expect_stderr", []):
+                if text not in err:
+                    rep.error(f"{label}: stderr lacks {text!r}")
+        rep.count("scripts smoke-tested")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--offline", action="store_true", help="skip the HTTP link check")
+    ap.add_argument("--no-smoke", action="store_true", help="skip the helper-script smoke tests")
     ap.add_argument("--only", nargs="+", type=Path, help="limit file checks to these paths")
     args = ap.parse_args()
 
@@ -230,6 +310,8 @@ def main() -> int:
     urls = check_files(rep, roots)
     if not args.offline:
         check_links(rep, urls)
+    if not args.no_smoke and not args.only:
+        run_smoke(rep)
 
     summary = ", ".join(f"{v} {k}" for k, v in sorted(rep.counts.items()))
     if rep.errors:

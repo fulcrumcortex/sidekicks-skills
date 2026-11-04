@@ -1,0 +1,4 @@
+business_name,category,street_address,suburb,state,postcode,website,phone_published,email_published,email_source_url,rooms_or_seats,booking_score,booking_evidence,booking_url,booking_date,market_score,market_evidence,market_url,market_date,size_score,size_evidence,size_url,size_date,signal_score,signal_evidence,signal_url,signal_date,sources,researched_by,researched_on,notes
+Inf Example Hotel,hotel,,,,,https://[broken,0400 000 201,,,,inf,x,https://e.example.org,2026-10-01,3,m,https://e.example.org,not-a-date,,,,,,,,,,,,,extra,cells
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,only notes
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,only notes

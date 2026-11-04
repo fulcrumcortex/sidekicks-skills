@@ -1,0 +1,18 @@
+{"scripts": {"plugins/fulcrum-care-workforce/skills/roster-planner/scripts/roster_check.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["--shifts", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/shifts-sample.csv", "--workers", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/workers-sample.csv", "--clients", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/clients-sample.csv", "--rules", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/compliance-rules.json"],
+       "expect_exit": [0],
+       "expect_stdout": ["- Shifts: 10; open: 2; high-severity conflicts: 11", "| high | SHORT_REST | SH-02 | Alex Example | 8.0 h between SH-02 and SH-03 (setting 10 h) |", "| high | COMPLIANCE_EXPIRED | SH-04 | Sam Sample | first_aid expired 2026-11-01 |", "| high | DOUBLE_BOOKED | SH-04 | Sam Sample | overlaps SH-05 |", "| Alex Example | 10.0 | 30 |", "| Jordan Test | 12.0 | 24 |", "- **SH-06**: Alex Example (13.0 h after, client's preferred worker"]},
+      {"kind": "empty", "args": ["--shifts", "tests/fixtures/roster-planner/empty.csv", "--workers", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/workers-sample.csv"],
+       "expect_exit": [1], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["--shifts", "tests/fixtures/roster-planner/missing-field.csv", "--workers", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/workers-sample.csv"],
+       "expect_exit": [1], "expect_stderr": ["missing columns: end"]},
+      {"kind": "edge", "args": ["--shifts", "tests/fixtures/roster-planner/header-only.csv", "--workers", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/workers-sample.csv"],
+       "expect_exit": [0], "expect_stdout": ["- Shifts: 0; open: 0; high-severity conflicts: 0", "No conflicts found."]},
+      {"kind": "edge", "args": ["--shifts", "tests/fixtures/roster-planner/bad-shifts.csv", "--workers", "tests/fixtures/roster-planner/bad-workers.csv"],
+       "expect_exit": [0], "expect_stdout": ["- Shifts: 2; open: 0; high-severity conflicts: 7", "| high | UNKNOWN_WORKER | SH-04 | W9 |"], "expect_stderr": ["max_hours_week 'thirty'", "availability window 'Monday 7am-3pm'", "first_aid=31/12/2027", "shift_id SH-01 appears more than once", "start '09/11/2026 18:00'", "SH-03: end must be after start"]},
+      {"kind": "edge", "args": ["--shifts", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/shifts-sample.csv", "--workers", "plugins/fulcrum-care-workforce/skills/roster-planner/assets/workers-sample.csv", "--rules", "tests/fixtures/roster-planner/bad-rules.json"],
+       "expect_exit": [1], "expect_stderr": ["min_rest_hours must be a number"]}
+    ]}}}

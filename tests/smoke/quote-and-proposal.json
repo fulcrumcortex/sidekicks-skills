@@ -1,0 +1,13 @@
+{"scripts": {"plugins/fulcrum-pa-core/skills/quote-and-proposal/scripts/quote_totals.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["tests/fixtures/quote-and-proposal/lines.csv", "--deposit", "20"], "expect_exit": [0],
+     "expect_stdout": ["Total (inc GST): $2,114.25", "GST (10%): $221.30", "Total (inc GST): $2,494.30", "Deposit 20%: $498.86   Balance: $1,995.44"]},
+    {"kind": "empty", "args": ["tests/fixtures/quote-and-proposal/empty.csv"], "expect_exit": [1], "expect_stderr": ["Input is empty"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/quote-and-proposal/missing-field.csv"], "expect_exit": [1], "expect_stderr": ["Missing column 'unit_price'"]},
+    {"kind": "edge", "args": ["tests/fixtures/quote-and-proposal/lines.csv", "--prices", "inc"], "expect_exit": [0], "expect_stdout": ["GST (10%): $169.77", "Subtotal (ex GST): $1,757.73"]},
+    {"kind": "edge", "args": ["tests/fixtures/quote-and-proposal/messy.csv"], "expect_exit": [1],
+     "expect_stdout": ["Total (inc GST): $258.00", "Lines not included"], "expect_stderr": ["'Infinity' is not a number in column unit_price", "qty is blank"]},
+    {"kind": "edge", "args": ["tests/fixtures/quote-and-proposal/header-only.csv"], "expect_exit": [0], "expect_stdout": ["No line items"]}
+  ]}}}

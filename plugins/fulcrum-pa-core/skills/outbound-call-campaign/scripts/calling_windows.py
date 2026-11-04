@@ -23,9 +23,11 @@ import datetime as dt
 import sys
 
 try:
-    from zoneinfo import ZoneInfo
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 except ImportError:  # Python < 3.9
     sys.exit("Python 3.9 or later is required (zoneinfo).")
+
+MAX_DAYS = 366
 
 ZONES = [
     ("NSW/ACT/VIC/TAS", "Australia/Sydney"),
@@ -66,8 +68,44 @@ def national_holidays(year):
 
 
 def parse_hhmm(s):
-    h, m = s.split(":")
+    h, m = s.strip().split(":")
     return dt.time(int(h), int(m))
+
+
+def time_range(s):
+    """argparse type for HH:MM-HH:MM with the start before the end."""
+    try:
+        a, b = s.split("-")
+        start, end = parse_hhmm(a), parse_hhmm(b)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected HH:MM-HH:MM such as 09:00-20:00, got '{s}'") from None
+    if start >= end:
+        raise argparse.ArgumentTypeError(f"window start must be before its end, got '{s}'")
+    return start, end
+
+
+def iso_date(s):
+    try:
+        return dt.date.fromisoformat(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected YYYY-MM-DD, got '{s}'") from None
+
+
+def parse_zone(s):
+    try:
+        return ZoneInfo(s)
+    except (ZoneInfoNotFoundError, ValueError):
+        raise argparse.ArgumentTypeError(f"unknown IANA time zone '{s}' (for example Australia/Sydney)") from None
+
+
+def day_count(s):
+    try:
+        n = int(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"expected a whole number, got '{s}'") from None
+    if not 1 <= n <= MAX_DAYS:
+        raise argparse.ArgumentTypeError(f"must be between 1 and {MAX_DAYS}, got {n}")
+    return n
 
 
 def window_for(day, weekday_hours, saturday_hours):
@@ -87,23 +125,25 @@ def to_platform(day, hours, zone, platform_zone):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--date", help="first calling date, YYYY-MM-DD (default today)")
-    ap.add_argument("--days", type=int, default=1, help="number of consecutive days to show (default 1)")
+    ap.add_argument("--date", type=iso_date, help="first calling date, YYYY-MM-DD (default today)")
+    ap.add_argument("--days", type=day_count, default=1,
+                    help=f"number of consecutive days to show, 1-{MAX_DAYS} (default 1)")
     ap.add_argument("--platform-tz", default="Australia/Sydney", help="time zone the calling platform uses")
-    ap.add_argument("--weekday", default="09:00-20:00", help="recipient-local weekday window")
-    ap.add_argument("--saturday", default="09:00-17:00", help="recipient-local Saturday window")
-    ap.add_argument("--platform-weekday", default="09:00-20:00", help="platform weekday window in platform time")
-    ap.add_argument("--platform-saturday", default="09:00-17:00", help="platform Saturday window in platform time")
+    ap.add_argument("--weekday", type=time_range, default="09:00-20:00", help="recipient-local weekday window")
+    ap.add_argument("--saturday", type=time_range, default="09:00-17:00", help="recipient-local Saturday window")
+    ap.add_argument("--platform-weekday", type=time_range, default="09:00-20:00",
+                    help="platform weekday window in platform time")
+    ap.add_argument("--platform-saturday", type=time_range, default="09:00-17:00",
+                    help="platform Saturday window in platform time")
     args = ap.parse_args()
 
-    def rng(s):
-        a, b = s.split("-")
-        return parse_hhmm(a), parse_hhmm(b)
-
-    local_wd, local_sat = rng(args.weekday), rng(args.saturday)
-    plat_wd, plat_sat = rng(args.platform_weekday), rng(args.platform_saturday)
-    pz = ZoneInfo(args.platform_tz)
-    first = dt.date.fromisoformat(args.date) if args.date else dt.date.today()
+    local_wd, local_sat = args.weekday, args.saturday
+    plat_wd, plat_sat = args.platform_weekday, args.platform_saturday
+    try:
+        pz = parse_zone(args.platform_tz)
+    except argparse.ArgumentTypeError as e:
+        ap.error(f"argument --platform-tz: {e}")
+    first = args.date or dt.date.today()
 
     for n in range(args.days):
         day = first + dt.timedelta(days=n)

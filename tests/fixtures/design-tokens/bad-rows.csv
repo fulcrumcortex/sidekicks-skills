@@ -1,0 +1,7 @@
+fg,bg,use,label
+#000000,#ffffff,text,black on white
+,#ffffff,text,blank foreground
+#zzzzzz,#ffffff,text,bad hex
+#777777,#ffffff,huge,bad use
+hsl(0 0 47),white,large,bare-number hsl grey
+#767676,#ffffff,text,mid grey on white,extra cell

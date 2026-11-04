@@ -9,7 +9,7 @@ Store in E.164 (`+61` then the number without its leading 0). Show people the na
 | Typed | Type | Store | Display |
 | --- | --- | --- | --- |
 | `0400 000 000`, `0400-000-000`, `400000000` | Mobile (04, rarely 05) | `+61400000000` | `0400 000 000` |
-| `(02) 9000 0000`, `02 9000 0000` | Landline, NSW/ACT | `+61290000000` | `(02) 9000 0000` |
+| `(02) 9000 0000`, `02 9000 0000`, `290000000` | Landline, NSW/ACT (a spreadsheet may drop the leading 0; restored with a "confirm" note) | `+61290000000` | `(02) 9000 0000` |
 | `03 ...` | VIC/TAS | `+613...` | `(03) ...` |
 | `07 ...` | QLD | `+617...` | `(07) ...` |
 | `08 ...` | SA/WA/NT | `+618...` | `(08) ...` |

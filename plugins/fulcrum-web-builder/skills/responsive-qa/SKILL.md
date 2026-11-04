@@ -12,6 +12,7 @@ Checks that a site works and looks intentional at every common width, in the mai
 - Before launch, after a layout change, or when users report "it is broken on my phone".
 - Checking a component library across container sizes.
 - Not for: WCAG conformance (`accessibility-audit`; reflow and target size overlap and are cross-referenced), speed (`core-web-vitals-pass`), or visual taste (`anti-slop-design-review`).
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

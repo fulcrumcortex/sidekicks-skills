@@ -1,0 +1,19 @@
+{"scripts": {"plugins/fulcrum-hospitality/skills/hospitality-prospect-research/scripts/dedupe_score.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["tests/fixtures/hospitality-prospect-research/prospects.csv", "--today", "2026-11-05"],
+       "expect_exit": [0],
+       "expect_stdout": ["18.0,21.0,85.7,A,2,", "10.0,21.0,47.6,B,1,missing-contact-route", "9.0,21.0,42.9,C,2,stale:market", "12.0,21.0,57.1,HOLD,1,email-no-source", "6.0,21.0,28.6,HOLD,1,no-evidence:booking;email-domain-mismatch", "https://reviews.example.org/laneway | https://register.example.org/laneway"],
+       "expect_stderr": ["rows in: 7, unique: 5, duplicates merged: 2, held: 2"]},
+      {"kind": "empty", "args": ["tests/fixtures/hospitality-prospect-research/empty.csv", "--today", "2026-11-05"],
+       "expect_exit": [1], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["tests/fixtures/hospitality-prospect-research/missing-field.csv", "--today", "2026-11-05"],
+       "expect_exit": [1], "expect_stderr": ["missing columns: business_name"]},
+      {"kind": "edge", "args": ["tests/fixtures/hospitality-prospect-research/header-only.csv", "--today", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["business_name,"], "expect_stderr": ["no prospect rows in the file"]},
+      {"kind": "edge", "args": ["tests/fixtures/hospitality-prospect-research/bad-rows.csv", "--today", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["9.0,21.0,42.9,HOLD,1,bad-score:booking;bad-date:market"], "expect_stderr": ["rows in: 3, unique: 3"]},
+      {"kind": "edge", "args": ["tests/fixtures/hospitality-prospect-research/prospects.csv", "--weights", "booking=1,market=3,size=2,signal=1,reviews=1"],
+       "expect_exit": [1], "expect_stderr": ["missing columns: reviews_score"]}
+    ]}}}

@@ -102,8 +102,9 @@ def analyse(raw: str, banned: list[str], claims: list[str], max_sentence: int) -
     ws = words(text)
     n_w, n_s = max(1, len(ws)), max(1, len(sents))
     syl = sum(syllables(w) for w in ws)
-    fre = 206.835 - 1.015 * (n_w / n_s) - 84.6 * (syl / n_w)
-    fkgl = 0.39 * (n_w / n_s) + 11.8 * (syl / n_w) - 15.59
+    # No words means no meaningful readability score; report None, not 205.8.
+    fre: float | None = round(206.835 - 1.015 * (n_w / n_s) - 84.6 * (syl / n_w), 1) if ws else None
+    fkgl: float | None = round(0.39 * (n_w / n_s) + 11.8 * (syl / n_w) - 15.59, 1) if ws else None
     long = [s for s in sents if len(words(s)) > max_sentence]
     passive = re.findall(r"\b(?:is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?\w+(?:ed|en)\b", text, flags=re.I)
     lw = [w.lower() for w in ws]
@@ -112,9 +113,9 @@ def analyse(raw: str, banned: list[str], claims: list[str], max_sentence: int) -
     return {
         "words": len(ws),
         "sentences": len(sents),
-        "avg_sentence_words": round(n_w / n_s, 1),
-        "flesch_reading_ease": round(fre, 1),
-        "fk_grade": round(fkgl, 1),
+        "avg_sentence_words": round(n_w / n_s, 1) if ws else 0.0,
+        "flesch_reading_ease": fre,
+        "fk_grade": fkgl,
         "long_sentences": long,
         "banned": find_phrases(text, banned),
         "claims": find_phrases(text, claims),
@@ -126,6 +127,10 @@ def analyse(raw: str, banned: list[str], claims: list[str], max_sentence: int) -
 
 def print_report(name: str, r: dict, max_sentence: int) -> None:
     print(f"== {name}")
+    if not r["words"]:
+        print("no words to check (empty input)")
+        print()
+        return
     print(f"words {r['words']}, sentences {r['sentences']}, average {r['avg_sentence_words']} words per sentence")
     print(f"Flesch reading ease {r['flesch_reading_ease']} (60-70 plain English; higher is easier)")
     print(f"Flesch-Kincaid grade {r['fk_grade']} (consumer copy: aim for 8 or lower; specialist B2B: 11 or lower)")
@@ -160,12 +165,28 @@ def main(argv: list[str] | None = None) -> int:
     except OSError as exc:
         print(f"error: cannot read ban list: {exc}", file=sys.stderr)
         return 2
+    except UnicodeDecodeError as exc:
+        print(f"error: ban list {args.banlist} is not UTF-8 text: {exc.reason}", file=sys.stderr)
+        return 2
+    if not banned and not claims:
+        print(f"error: ban list {args.banlist} has no phrases (expected Markdown tables whose first column is 'Phrase')", file=sys.stderr)
+        return 2
+    if args.max_sentence < 1:
+        print("error: --max-sentence must be at least 1", file=sys.stderr)
+        return 2
     out = {}
     for f in args.files:
         try:
-            raw = sys.stdin.read() if f == "-" else open(f, encoding="utf-8").read()
+            if f == "-":
+                raw = sys.stdin.read()
+            else:
+                with open(f, encoding="utf-8") as fh:
+                    raw = fh.read()
         except OSError as exc:
             print(f"error: {exc}", file=sys.stderr)
+            return 2
+        except UnicodeDecodeError as exc:
+            print(f"error: {f} is not UTF-8 text: {exc.reason}", file=sys.stderr)
             return 2
         out[f] = analyse(raw, banned, claims, args.max_sentence)
     if args.json:

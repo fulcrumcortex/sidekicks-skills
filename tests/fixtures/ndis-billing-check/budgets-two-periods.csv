@@ -1,0 +1,4 @@
+participant_ref,support_item,agreed_amount,period_start,period_end,funding_type
+P-ALPHA,TH_,1000.00,2026-07-01,2026-09-30,plan
+P-ALPHA,TH_,1000.00,2026-10-01,2027-06-30,plan
+P-CHARLIE,TH_,2000.00,2026-07-01,2026-10-15,self

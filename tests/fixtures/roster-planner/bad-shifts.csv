@@ -1,0 +1,6 @@
+shift_id,client_ref,start,end,location,required_skills,required_compliance,worker_id
+SH-01,C-ALPHA,2026-11-09 07:00,2026-11-09 10:00,Northside,personal_care,,W1,extra
+SH-01,C-ALPHA,2026-11-10 07:00,2026-11-10 10:00,Northside,personal_care,,W1
+SH-02,C-BRAVO,09/11/2026 18:00,2026-11-09 22:00,Eastgate,personal_care,,W1
+SH-03,C-BRAVO,2026-11-11 22:00,2026-11-11 06:00,Eastgate,personal_care,,W1
+SH-04,C-DELTA,2026-11-12 09:00,2026-11-12 12:00,Northside,community_access,,W9

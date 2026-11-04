@@ -1,0 +1,5 @@
+line,code,description,category,qty,unit,type,allowance,notes
+1,EX-PB-10,Plasterboard 10mm 2400x1200,plasterboard,abc,m2,item,,
+2,EX-STUD-90,Stud 90x45 MGP10 2.4m,timber framing,10,each,item,,extra,cells,here
+3,EX-ZERO,Cover strip,timber framing,5,each,item,,
+4,,Rock excavation if encountered,,,,PS,lots,

@@ -1,0 +1,2 @@
+session_id,participant_ref,date,start,end,status,unit,quantity,unit_price,note_ref
+S-1001,P-ALPHA,2026-10-06,09:00,10:00,completed,hour,,100.00,N-501

@@ -1,0 +1,17 @@
+{"scripts": {"plugins/fulcrum-web-builder/skills/conversion-copy-review/scripts/copy_lint.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["tests/fixtures/conversion-copy-review/landing-copy.txt"], "expect_exit": [1],
+     "expect_stdout": ["words 53, sentences 5, average 10.6 words per sentence", "'you' words 5, 'we' words 2", "- passionate about x1", "- cutting-edge x1", "- fastest x1", "- free x1"]},
+    {"kind": "empty", "args": ["tests/fixtures/conversion-copy-review/empty.txt"], "expect_exit": [0],
+     "expect_stdout": ["no words to check"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/conversion-copy-review/landing-copy.txt", "--banlist", "tests/fixtures/conversion-copy-review/banlist-no-table.txt"], "expect_exit": [2],
+     "expect_stderr": ["has no phrases"]},
+    {"kind": "edge", "args": ["-"], "stdin": "tests/fixtures/conversion-copy-review/clean-copy.txt", "expect_exit": [0],
+     "expect_stdout": ["words 20, sentences 2", "banned phrases: none", "claims needing evidence: none"]},
+    {"kind": "edge", "args": ["tests/fixtures/conversion-copy-review/latin1-copy.dat"], "expect_exit": [2],
+     "expect_stderr": ["is not UTF-8 text"]},
+    {"kind": "edge", "args": ["tests/fixtures/conversion-copy-review/empty.txt", "--json"], "expect_exit": [0],
+     "expect_stdout": ["\"words\": 0", "\"flesch_reading_ease\": null"]}
+  ]}}}

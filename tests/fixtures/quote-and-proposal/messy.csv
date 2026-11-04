@@ -1,0 +1,8 @@
+description,qty,unit_price,gst,discount_pct
+Site survey and measure,1,$180.00,Y,
+Supply and install split system,,1450.00,Y,
+Labour (hours),two,95.00,Y,
+Materials allowance,1,Infinity,Y,
+Travel,1,50.00,Y,150
+,,,,
+Disposal of old unit,1,60.00,N,,extra

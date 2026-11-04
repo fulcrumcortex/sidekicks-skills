@@ -1,0 +1,18 @@
+{"scripts": {"plugins/fulcrum-trades-field/skills/takeoff-to-quote/scripts/bom_to_quote.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["--bom", "tests/fixtures/takeoff-to-quote/bom.csv", "--catalogue", "tests/fixtures/takeoff-to-quote/catalogue.csv", "--waste", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/waste-allowances.csv", "--labour", "tests/fixtures/takeoff-to-quote/labour.csv", "--stock", "tests/fixtures/takeoff-to-quote/stock.csv", "--material-markup", "15", "--valid-days", "30", "--date", "2026-11-05"],
+       "expect_exit": [0],
+       "expect_stdout": ["(COMPLETE)", "| 34 sheet | Example Building Supplies | 18.50 | 723.35 | 21.60 | 1620.00 |", "| Materials (ex GST) | 2,248.02 |", "**9,967.02**", "| GST | 996.70 |", "**10,963.72**", "| EX-PB-10 | Plasterboard 10mm 2400x1200 | 4 | sheet | 18.50 | 74.00 | 1 |", "valid until 2026-11-20, before the quote expires on 2026-12-05"]},
+      {"kind": "empty", "args": ["--bom", "tests/fixtures/takeoff-to-quote/empty.csv", "--catalogue", "tests/fixtures/takeoff-to-quote/catalogue.csv"],
+       "expect_exit": [0, 1], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["--bom", "tests/fixtures/takeoff-to-quote/missing-field.csv", "--catalogue", "tests/fixtures/takeoff-to-quote/catalogue.csv"],
+       "expect_exit": [0, 1], "expect_stderr": ["missing columns: qty"]},
+      {"kind": "edge", "args": ["--bom", "tests/fixtures/takeoff-to-quote/header-only.csv", "--catalogue", "tests/fixtures/takeoff-to-quote/catalogue.csv", "--date", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["The BOM has no lines", "**0.00**"]},
+      {"kind": "edge", "args": ["--bom", "tests/fixtures/takeoff-to-quote/bad-bom.csv", "--catalogue", "tests/fixtures/takeoff-to-quote/bad-catalogue.csv", "--waste", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/waste-allowances.csv", "--labour", "tests/fixtures/takeoff-to-quote/labour.csv", "--stock", "tests/fixtures/takeoff-to-quote/stock.csv", "--date", "2026-11-05", "--format", "json"],
+       "expect_exit": [1], "expect_stdout": ["\"status\": \"INCOMPLETE\"", "\"subtotal\": \"227.80\"", "'qty' is not a number: 'abc'"], "expect_stderr": ["'NaN'. Catalogue row skipped.", "coverage and pack_size must be greater than zero"]},
+      {"kind": "edge", "args": ["--bom", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/bom-template.csv", "--catalogue", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/catalogue-template.csv", "--waste", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/waste-allowances.csv", "--labour", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/labour-rates-template.csv", "--stock", "plugins/fulcrum-trades-field/skills/takeoff-to-quote/assets/stock-on-hand-template.csv", "--date", "2026-11-05"],
+       "expect_exit": [1], "expect_stdout": ["INCOMPLETE: 8 missing"], "expect_stderr": ["stock row 2: 'on_hand' is blank"]}
+    ]}}}

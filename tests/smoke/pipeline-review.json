@@ -1,0 +1,13 @@
+{"scripts": {"plugins/fulcrum-pa-core/skills/pipeline-review/scripts/pipeline_review.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["plugins/fulcrum-pa-core/skills/pipeline-review/assets/sample-deals.csv", "--as-of", "2026-11-06", "--target", "120000"], "expect_exit": [0],
+     "expect_stdout": ["Worst:       $26,200", "Likely:      $54,249", "Best:        $103,700", "Open deals: 7 · flagged: 4"]},
+    {"kind": "empty", "args": ["tests/fixtures/pipeline-review/empty.csv"], "expect_exit": [1], "expect_stderr": ["is empty"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/pipeline-review/missing-field.csv"], "expect_exit": [1], "expect_stderr": ["missing required column(s): stage"]},
+    {"kind": "edge", "args": ["tests/fixtures/pipeline-review/messy.csv", "--as-of", "2026-11-06"], "expect_exit": [0],
+     "expect_stdout": ["Likely:      $4,800", "row 3 (D-302): unreadable amount 'lots'", "row 5 (D-304): no stage"], "expect_stderr": ["skipped row 4 (D-303): unrecognised date '2026-02-30'"]},
+    {"kind": "edge", "args": ["plugins/fulcrum-pa-core/skills/pipeline-review/assets/sample-deals.csv", "--period", "2026-11-01"], "expect_exit": [2], "expect_stderr": ["--period must be START:END"]},
+    {"kind": "edge", "args": ["plugins/fulcrum-pa-core/skills/pipeline-review/assets/sample-deals.csv", "--config", "tests/fixtures/pipeline-review/bad-config.json"], "expect_exit": [1], "expect_stderr": ["probability must be a non-negative number"]}
+  ]}}}

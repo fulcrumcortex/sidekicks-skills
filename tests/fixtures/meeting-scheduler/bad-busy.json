@@ -1,0 +1,5 @@
+{"duration_minutes": 30,
+ "search": {"start": "2026-11-09", "end": "2026-11-10", "timezone": "Australia/Sydney"},
+ "now": "2026-11-06T10:00:00+11:00",
+ "participants": [{"name": "Owner", "timezone": "Australia/Sydney",
+                   "busy": [{"start": "2026-11-09T09:00:00+11:00"}]}]}

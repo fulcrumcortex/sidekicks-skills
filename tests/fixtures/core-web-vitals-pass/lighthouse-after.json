@@ -1,0 +1,29 @@
+{
+  "lighthouseVersion": "12.2.1",
+  "requestedUrl": "https://www.example.com/",
+  "finalDisplayedUrl": "https://www.example.com/",
+  "fetchTime": "2026-11-03T02:20:41.000Z",
+  "configSettings": {"formFactor": "mobile", "throttlingMethod": "simulate"},
+  "categories": {
+    "performance": {
+      "id": "performance",
+      "score": 0.91,
+      "auditRefs": [
+        {"id": "largest-contentful-paint"}, {"id": "total-blocking-time"}, {"id": "cumulative-layout-shift"},
+        {"id": "first-contentful-paint"}, {"id": "speed-index"}, {"id": "server-response-time"},
+        {"id": "unused-javascript"}, {"id": "largest-contentful-paint-element"}
+      ]
+    }
+  },
+  "audits": {
+    "first-contentful-paint": {"title": "First Contentful Paint", "score": 0.9, "scoreDisplayMode": "numeric", "numericValue": 1790.0},
+    "largest-contentful-paint": {"title": "Largest Contentful Paint", "score": 0.9, "scoreDisplayMode": "numeric", "numericValue": 2380.7},
+    "total-blocking-time": {"title": "Total Blocking Time", "score": 0.92, "scoreDisplayMode": "numeric", "numericValue": 150.0},
+    "cumulative-layout-shift": {"title": "Cumulative Layout Shift", "score": 0.99, "scoreDisplayMode": "numeric", "numericValue": 0.02},
+    "speed-index": {"title": "Speed Index", "score": 0.93, "scoreDisplayMode": "numeric", "numericValue": 2810.0},
+    "server-response-time": {"title": "Initial server response time was short", "score": 1, "scoreDisplayMode": "metricSavings", "numericValue": 298.1, "metricSavings": {"FCP": 0, "LCP": 0}},
+    "unused-javascript": {"title": "Reduce unused JavaScript", "score": 0.5, "scoreDisplayMode": "metricSavings", "displayValue": "Potential savings of 41 KiB", "metricSavings": {"LCP": 150, "FCP": 150}},
+    "largest-contentful-paint-element": {"title": "Largest Contentful Paint element", "score": 1, "scoreDisplayMode": "metricSavings", "metricSavings": {"LCP": 0},
+      "details": {"type": "list", "items": [{"type": "table", "items": [{"node": {"type": "node", "snippet": "<img src=\"/hero.avif\" alt=\"Electrician fitting a switchboard\" fetchpriority=\"high\">"}}]}]}}
+  }
+}

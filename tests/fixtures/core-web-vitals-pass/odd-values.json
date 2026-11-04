@@ -1,0 +1,14 @@
+{
+  "loadingExperience": {"metrics": {"LARGEST_CONTENTFUL_PAINT_MS": {"category": "FAST"}, "CUMULATIVE_LAYOUT_SHIFT_SCORE": "n/a"}},
+  "lighthouseResult": {
+    "finalUrl": "https://www.example.com/contact",
+    "configSettings": null,
+    "categories": {"performance": {"score": null, "auditRefs": ["bad-ref", {"id": "uses-text-compression"}, {"id": "dom-size"}]}},
+    "audits": {
+      "largest-contentful-paint": {"numericValue": "2400"},
+      "cumulative-layout-shift": {"numericValue": 0.31},
+      "uses-text-compression": {"title": "Enable text compression", "score": "0.4", "metricSavings": {"LCP": "300", "FCP": null}},
+      "dom-size": "not an object"
+    }
+  }
+}

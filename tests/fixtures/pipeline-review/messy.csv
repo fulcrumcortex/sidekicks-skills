@@ -1,0 +1,8 @@
+deal_id,name,owner,stage,amount,probability,expected_close,last_activity,next_step,next_step_due,stage_entered,close_date_changes,status,closed_date
+D-301,Mallee Print - signage,Alex,Proposal,"$12,000",40%,20/11/2026,2026-11-02,Call back,2026-11-10,2026-10-30,0,open,
+D-302,Kookaburra Events - AV hire,Sam,Proposal,lots,,2026-11-25,2026-11-01,Send quote,2026-11-09,2026-10-30,0,open,
+D-303,Ironbark Plumbing - service plan,Sam,Negotiation,8000,60,2026-02-30,2026-11-01,,,2026-10-30,0,open,
+D-304,Saltbush Freight - depot,Alex,,5000,,2026-11-25,2026-11-01,,,,0,open,
+D-305,Harbour Lane - fit-out,Sam,Contract,15000,180,2026-11-25,2026-11-01,,,,0,open,
+D-306,Wattle Cafe - catering,Alex,Qualified,3000,,2026-11-25,2026-11-01,Visit,2026-11-12,2026-10-30,one,open,
+,,,,,,,,,,,,,

@@ -1,0 +1,17 @@
+{"scripts": {"plugins/fulcrum-professional-services/skills/insurance-renewal-campaign/scripts/renewal_stage.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["--policies", "tests/fixtures/insurance-renewal-campaign/renewals.csv", "--date", "2026-11-05"],
+       "expect_exit": [0],
+       "expect_stdout": ["| expired | -4 | POL-1006 |", "| D-7 | 4 | POL-1001 |", "| D-60 | 45 | POL-1003 | Demo Motors Pty Ltd | Motor fleet | email, SMS |", "next touch from 2026-11-07", "enters D-60 on 2026-12-31", "POL-1005 (Sample Bakery Pty Ltd): status renewed"],
+       "expect_stderr": ["expiry '31/12/2026' is not YYYY-MM-DD", "last_contact 'yesterday'"]},
+      {"kind": "empty", "args": ["--policies", "tests/fixtures/insurance-renewal-campaign/empty.csv", "--date", "2026-11-05"],
+       "expect_exit": [0, 1], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["--policies", "tests/fixtures/insurance-renewal-campaign/missing-field.csv", "--date", "2026-11-05"],
+       "expect_exit": [0, 1], "expect_stderr": ["missing columns: expiry"]},
+      {"kind": "edge", "args": ["--policies", "tests/fixtures/insurance-renewal-campaign/header-only.csv", "--date", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["No policies in the file"]},
+      {"kind": "edge", "args": ["--policies", "tests/fixtures/insurance-renewal-campaign/renewals.csv", "--date", "05/11/2026"],
+       "expect_exit": [2], "expect_stderr": ["not a YYYY-MM-DD date"]}
+    ]}}}

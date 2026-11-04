@@ -1,0 +1,2 @@
+{"commencement": "2024-07-01", "end": "2025-06-30", "base_rent": 60000, "frequency": "monthly",
+ "reviews": [{"date": "2025-01-01", "type": "cpi", "cpi_old": 0, "cpi_new": 140.1}]}

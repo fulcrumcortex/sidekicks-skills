@@ -1,0 +1,1 @@
+{"lighthouseResult": {"audits": {"largest-contentful-paint": {"numericValue": 2400

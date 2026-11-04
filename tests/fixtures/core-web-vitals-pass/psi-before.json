@@ -1,0 +1,80 @@
+{
+  "captchaResult": "CAPTCHA_NOT_NEEDED",
+  "kind": "pagespeedonline#result",
+  "id": "https://www.example.com/",
+  "loadingExperience": {
+    "id": "https://www.example.com/",
+    "metrics": {
+      "LARGEST_CONTENTFUL_PAINT_MS": {"percentile": 3100, "category": "AVERAGE"},
+      "INTERACTION_TO_NEXT_PAINT": {"percentile": 240, "category": "AVERAGE"},
+      "CUMULATIVE_LAYOUT_SHIFT_SCORE": {"percentile": 12, "category": "AVERAGE"},
+      "FIRST_CONTENTFUL_PAINT_MS": {"percentile": 1700, "category": "FAST"},
+      "EXPERIMENTAL_TIME_TO_FIRST_BYTE": {"percentile": 950, "category": "AVERAGE"}
+    },
+    "overall_category": "AVERAGE"
+  },
+  "originLoadingExperience": {
+    "id": "https://www.example.com",
+    "metrics": {
+      "LARGEST_CONTENTFUL_PAINT_MS": {"percentile": 2700, "category": "AVERAGE"},
+      "INTERACTION_TO_NEXT_PAINT": {"percentile": 180, "category": "FAST"},
+      "CUMULATIVE_LAYOUT_SHIFT_SCORE": {"percentile": 5, "category": "FAST"}
+    },
+    "overall_category": "AVERAGE"
+  },
+  "lighthouseResult": {
+    "requestedUrl": "https://www.example.com/",
+    "finalUrl": "https://www.example.com/",
+    "finalDisplayedUrl": "https://www.example.com/",
+    "lighthouseVersion": "12.2.1",
+    "fetchTime": "2026-11-01T02:14:07.000Z",
+    "configSettings": {"formFactor": "mobile", "throttlingMethod": "simulate", "locale": "en-US"},
+    "categories": {
+      "performance": {
+        "id": "performance",
+        "title": "Performance",
+        "score": 0.62,
+        "auditRefs": [
+          {"id": "first-contentful-paint", "weight": 10, "group": "metrics"},
+          {"id": "largest-contentful-paint", "weight": 25, "group": "metrics"},
+          {"id": "total-blocking-time", "weight": 30, "group": "metrics"},
+          {"id": "cumulative-layout-shift", "weight": 25, "group": "metrics"},
+          {"id": "speed-index", "weight": 10, "group": "metrics"},
+          {"id": "render-blocking-resources", "weight": 0},
+          {"id": "modern-image-formats", "weight": 0},
+          {"id": "unused-javascript", "weight": 0},
+          {"id": "third-party-summary", "weight": 0},
+          {"id": "font-display", "weight": 0},
+          {"id": "largest-contentful-paint-element", "weight": 0},
+          {"id": "server-response-time", "weight": 0}
+        ]
+      }
+    },
+    "audits": {
+      "first-contentful-paint": {"id": "first-contentful-paint", "title": "First Contentful Paint", "score": 0.55, "scoreDisplayMode": "numeric", "numericValue": 2640.2, "displayValue": "2.6 s"},
+      "largest-contentful-paint": {"id": "largest-contentful-paint", "title": "Largest Contentful Paint", "score": 0.21, "scoreDisplayMode": "numeric", "numericValue": 4212.3, "displayValue": "4.2 s"},
+      "total-blocking-time": {"id": "total-blocking-time", "title": "Total Blocking Time", "score": 0.6, "scoreDisplayMode": "numeric", "numericValue": 380.0, "displayValue": "380 ms"},
+      "cumulative-layout-shift": {"id": "cumulative-layout-shift", "title": "Cumulative Layout Shift", "score": 0.94, "scoreDisplayMode": "numeric", "numericValue": 0.08, "displayValue": "0.08"},
+      "speed-index": {"id": "speed-index", "title": "Speed Index", "score": 0.7, "scoreDisplayMode": "numeric", "numericValue": 4120.9, "displayValue": "4.1 s"},
+      "server-response-time": {"id": "server-response-time", "title": "Initial server response time was short", "score": 1, "scoreDisplayMode": "metricSavings", "numericValue": 312.4, "displayValue": "Root document took 310 ms", "metricSavings": {"FCP": 0, "LCP": 0}},
+      "render-blocking-resources": {"id": "render-blocking-resources", "title": "Eliminate render-blocking resources", "score": 0.3, "scoreDisplayMode": "metricSavings", "displayValue": "Potential savings of 610 ms", "metricSavings": {"FCP": 600, "LCP": 600}},
+      "modern-image-formats": {"id": "modern-image-formats", "title": "Serve images in modern formats", "score": 0.5, "scoreDisplayMode": "metricSavings", "displayValue": "Potential savings of 182 KiB", "metricSavings": {"LCP": 450, "FCP": 0}},
+      "unused-javascript": {"id": "unused-javascript", "title": "Reduce unused JavaScript", "score": 0.5, "scoreDisplayMode": "metricSavings", "displayValue": "Potential savings of 96 KiB", "metricSavings": {"LCP": 150, "FCP": 150}},
+      "third-party-summary": {"id": "third-party-summary", "title": "Reduce the impact of third-party code", "score": null, "scoreDisplayMode": "informative", "displayValue": "Third-party code blocked the main thread for 40 ms", "metricSavings": {"TBT": 0}},
+      "font-display": {"id": "font-display", "title": "All text remains visible during webfont loads", "score": 1, "scoreDisplayMode": "metricSavings", "metricSavings": {"FCP": 0}},
+      "largest-contentful-paint-element": {
+        "id": "largest-contentful-paint-element",
+        "title": "Largest Contentful Paint element",
+        "score": 0,
+        "scoreDisplayMode": "metricSavings",
+        "displayValue": "4,210 ms",
+        "metricSavings": {"LCP": 1700},
+        "details": {"type": "list", "items": [
+          {"type": "table", "items": [{"node": {"type": "node", "selector": "section.hero > img", "snippet": "<img src=\"/hero.jpg\" alt=\"Electrician fitting a switchboard\" class=\"hero-image\">"}}]},
+          {"type": "table", "items": [{"phase": "TTFB", "timing": 312}, {"phase": "Load Delay", "timing": 1890}, {"phase": "Load Time", "timing": 1410}, {"phase": "Render Delay", "timing": 600}]}
+        ]}
+      }
+    }
+  },
+  "analysisUTCTimestamp": "2026-11-01T02:14:07.000Z"
+}

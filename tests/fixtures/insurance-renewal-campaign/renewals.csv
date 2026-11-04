@@ -1,0 +1,9 @@
+policy,client,class,insurer,expiry,status,last_contact,docs_outstanding,sms_opt_out,do_not_call,email_opt_out,account_manager,notes
+POL-1001,Example Cafe Pty Ltd,Business pack,Sample Insurer,2026-11-09,open,2026-11-02,Y,N,N,N,Alex Chen,Terms received
+POL-1002,Sample Plumbing Pty Ltd,Public liability,Sample Insurer,2026-11-25,open,2026-11-03,N,N,N,N,Alex Chen,
+POL-1003,Demo Motors Pty Ltd,Motor fleet,Demo Underwriting,2026-12-20,,,N,N,Y,N,Sam Lee,Prefers email
+POL-1004,Test Dental Pty Ltd,Professional indemnity,Demo Underwriting,2027-03-01,open,,N,N,N,N,Sam Lee,
+POL-1005,Sample Bakery Pty Ltd,Business pack,Sample Insurer,2026-11-12,renewed,2026-10-28,N,N,N,N,Alex Chen,Renewed early
+POL-1006,Example Florist,Business pack,Sample Insurer,2026-11-01,open,2026-10-20,N,Y,Y,Y,Priya Nair,
+POL-1007,Demo Joinery Pty Ltd,Contract works,Sample Insurer,31/12/2026,open,,N,N,N,N,Priya Nair,
+POL-1008,Test Logistics Pty Ltd,Marine transit,Demo Underwriting,2026-11-17,open,yesterday,Y,N,N,N,Priya Nair,Extra,cells

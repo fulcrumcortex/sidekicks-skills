@@ -12,6 +12,7 @@ Gives a design team a ranked list of usability problems with evidence and a spec
 - Reviewing a screen, a multi-step flow (sign-up, booking, checkout, onboarding) or a component before build or after poor metrics.
 - A stakeholder says "it feels clunky" and the team needs specifics.
 - Not for: WCAG conformance (`accessibility-audit`), copy rewriting in depth (`conversion-copy-review`), visual distinctiveness (`anti-slop-design-review`), or layout breakage across devices (`responsive-qa`).
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

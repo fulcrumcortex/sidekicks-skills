@@ -1,0 +1,14 @@
+{"scripts": {"plugins/fulcrum-pa-core/skills/invoice-chasing/scripts/ageing.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["plugins/fulcrum-pa-core/skills/invoice-chasing/assets/sample-receivables.csv", "--as-of", "2026-11-05", "--detail"],
+     "expect_exit": [0],
+     "expect_stdout": ["| **Total** | **15,435.00** |", "| 90+ | 10,100.00 | 65% |", "| Bluegum Joinery (fictional) | 0.00 | 0.00 | 0.00 | 0.00 | 6,800.00 | 6,800.00 | 118 | 6 external options review |", "On hold (disputed, not chased): 660.00"]},
+    {"kind": "empty", "args": ["tests/fixtures/invoice-chasing/empty.csv", "--as-of", "2026-11-05"], "expect_exit": [1], "expect_stderr": ["Input is empty"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/invoice-chasing/missing-field.csv", "--as-of", "2026-11-05"], "expect_exit": [1], "expect_stderr": ["No debtor/customer column found"]},
+    {"kind": "edge", "args": ["tests/fixtures/invoice-chasing/messy.csv", "--as-of", "2026-11-05"], "expect_exit": [0],
+     "expect_stdout": ["| **Total** | **1,020.00** |", "row 3: unrecognised date '31/02/2026'", "row 5: unreadable amount"], "expect_stderr": ["5 row(s) skipped"]},
+    {"kind": "edge", "args": ["tests/fixtures/invoice-chasing/header-only.csv", "--as-of", "2026-11-05", "--format", "json"], "expect_exit": [0], "expect_stdout": ["\"debtors\": []"]},
+    {"kind": "edge", "args": ["plugins/fulcrum-pa-core/skills/invoice-chasing/assets/sample-receivables.csv", "--as-of", "5/11/2026"], "expect_exit": [2], "expect_stderr": ["--as-of must be a date in YYYY-MM-DD form"]}
+  ]}}}

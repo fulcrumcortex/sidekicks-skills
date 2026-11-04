@@ -1,0 +1,5 @@
+:root {
+  --text-display: clamp(2.25rem, 1.6rem + 3vw, 4.5rem);
+  --ink: oklch(21% 0.005 80);
+  --ink-muted: oklch(48% 0.008 80);
+}

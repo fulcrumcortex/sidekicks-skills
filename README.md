@@ -10,7 +10,7 @@ Skills guide behaviour. **Installing a skill does not connect an app, grant perm
 
 ## Install
 
-### Claude Code
+### Install in Claude Code
 
 Add this repository as a plugin marketplace, then install the packs you want:
 
@@ -22,7 +22,7 @@ Add this repository as a plugin marketplace, then install the packs you want:
 
 The marketplace is named `fulcrum-sidekicks`. Install only the industry packs you need, for example `fulcrum-property@fulcrum-sidekicks` or `fulcrum-care-workforce@fulcrum-sidekicks`. Run `/plugin` to browse, update or remove them. Plugin skills are namespaced, for example `fulcrum-pa-core:invoice-chasing`.
 
-### Fulcrum Code
+### Install in Fulcrum Code
 
 In a Fulcrum Code session:
 
@@ -32,7 +32,25 @@ In a Fulcrum Code session:
 /skills
 ```
 
-These commands install the starter pack `fulcrum-sidekicks`. To install another pack, use its plugin name, for example `/marketplace install fulcrum-pa-core`. Start a new session if newly installed skills are not listed. See [Skills, Sidekicks and specialist agents](https://fulcrumcortex.github.io/documentation/code/skills-and-agents/).
+The marketplace name and plugin name are both `fulcrum-sidekicks`. Review the skills before installing. Start a new session if the installed skills are not yet listed. These commands are verified against the current Fulcrum Code marketplace implementation; they are not generic commands for every agent host.
+
+For example:
+
+```text
+Use the fulcrum-crm-follow-up skill.
+Read the latest enquiry for the contact I selected.
+Prepare a reply and a next-action suggestion. Do not send it.
+```
+
+The other packs install the same way by plugin name, for example `/marketplace install fulcrum-pa-core` or `/marketplace install fulcrum-web-builder`.
+
+To uninstall the pack in Fulcrum Code:
+
+```text
+/marketplace remove-plugin fulcrum-sidekicks
+```
+
+See [Skills, Sidekicks and specialist agents](https://fulcrumcortex.github.io/documentation/code/skills-and-agents/).
 
 ### Copy individual skills
 
@@ -184,13 +202,15 @@ plugins/<plugin>/skills/<skill>/    SKILL.md plus optional references/, assets/,
 catalog.json                        showcase index for the starter pack
 scripts/validate.py                 repository checks (standard library only)
 scripts/check_catalog.py            starter-pack showcase index check
+tests/smoke/, tests/fixtures/       smoke cases and sample inputs for every helper script
 ```
 
 ## Validate and contribute
 
 ```bash
-python3 scripts/validate.py            # front matter, manifests, JSON, banned words, relative links, live links
+python3 scripts/validate.py            # front matter, manifests, JSON, banned words, links, script smoke tests
 python3 scripts/validate.py --offline  # everything except the live link check
+python3 scripts/validate.py --no-smoke # skip the helper-script smoke tests
 python3 scripts/check_catalog.py
 ```
 

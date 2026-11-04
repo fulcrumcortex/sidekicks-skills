@@ -1,0 +1,5 @@
+# Phrases we avoid
+
+- unlock
+- seamless
+- cutting-edge

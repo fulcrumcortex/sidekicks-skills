@@ -1,0 +1,11 @@
+﻿time,party_size,name,duration,status,phone
+18:00,4,Example A,,confirmed,0400 000 001
+18:00,6,Sample B,,confirmed,0400 000 002
+18:30,2,Demo C,,confirmed,0400 000 003
+19:00,8,Test D,,confirmed,0400 000 004
+19:00,6,Avery E,,confirmed,0400 000 005
+19:05,4,Blake F,,confirmed,0400 000 006
+19:30,2,Casey G,60,confirmed,0400 000 007
+19:00,2,Drew H,,cancelled,0400 000 008
+21:15,2,Ellis J,,confirmed,0400 000 009
+19:45,two,Fin K,,confirmed,0400 000 010

@@ -1,0 +1,13 @@
+{"scripts": {"plugins/fulcrum-pa-core/skills/meeting-scheduler/scripts/find_slots.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["plugins/fulcrum-pa-core/skills/meeting-scheduler/assets/freebusy-example.json"], "expect_exit": [0],
+     "expect_stdout": ["59 suit every required participant", "Owner (Sydney): Mon 09 Nov 14:00-14:45 AEDT", "Client (Brisbane): Mon 09 Nov 13:00-13:45 AEST"]},
+    {"kind": "empty", "args": ["tests/fixtures/meeting-scheduler/empty.json"], "expect_exit": [1], "expect_stderr": ["is empty"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/meeting-scheduler/missing-field.json"], "expect_exit": [1], "expect_stderr": ["needs a non-empty 'participants' list"]},
+    {"kind": "edge", "args": ["tests/fixtures/meeting-scheduler/utc-z.json", "--format", "json"], "expect_exit": [0],
+     "expect_stdout": ["\"start_utc\": \"2026-11-08T23:00:00+00:00\"", "\"score\": 85"]},
+    {"kind": "edge", "args": ["tests/fixtures/meeting-scheduler/bad-busy.json"], "expect_exit": [1], "expect_stderr": ["busy block 1: needs both start and end"]},
+    {"kind": "edge", "args": ["tests/fixtures/meeting-scheduler/no-slot.json"], "expect_exit": [2], "expect_stdout": ["No common slot", "Owner (Sydney): busy: 29"]}
+  ]}}}

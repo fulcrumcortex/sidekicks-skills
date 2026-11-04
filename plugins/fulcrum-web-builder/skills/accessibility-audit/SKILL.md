@@ -12,6 +12,7 @@ Produces an evidence-based findings list for one page, flow or component, ranked
 - Before launch, after a redesign, or when a complaint or procurement checklist mentions accessibility.
 - Reviewing a component library piece (modal, menu, form, carousel, tabs).
 - Not for: contrast tuning of a whole palette (`design-tokens`), general usability (`ux-critique`), or a responsive layout pass (`responsive-qa`), though findings from those often overlap.
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

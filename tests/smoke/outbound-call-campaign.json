@@ -1,0 +1,29 @@
+{"scripts": {
+  "plugins/fulcrum-pa-core/skills/outbound-call-campaign/scripts/calling_windows.py": {
+    "no_input": true,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["--date", "2026-11-09"], "expect_exit": [0],
+       "expect_stdout": ["Monday 09 November 2026", "QLD              10:00-20:00", "WA               12:00-20:00", "ALL ZONES        12:00-20:00"]},
+      {"kind": "edge", "args": ["--date", "2026-04-03", "--days", "2", "--platform-tz", "Australia/Perth"], "expect_exit": [0],
+       "expect_stdout": ["NO CALLS: national public holiday (Good Friday)", "NSW/ACT/VIC/TAS  09:00-14:00", "ALL ZONES        09:00-14:00"]},
+      {"kind": "edge", "args": ["--date", "2026-11-09", "--weekday", "9-20"], "expect_exit": [2], "expect_stderr": ["expected HH:MM-HH:MM"]},
+      {"kind": "edge", "args": ["--platform-tz", "Mars/Base"], "expect_exit": [2], "expect_stderr": ["unknown IANA time zone"]}
+    ]},
+  "plugins/fulcrum-pa-core/skills/outbound-call-campaign/scripts/clean_call_list.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["tests/fixtures/outbound-call-campaign/call-list.csv", "--suppress", "tests/fixtures/outbound-call-campaign/suppress.txt",
+                                  "--dncr-registered", "tests/fixtures/outbound-call-campaign/wash-registered.csv", "--wash-date", "2026-11-01",
+                                  "--as-of", "2026-11-09", "--consent-col", "consent"],
+       "expect_exit": [0],
+       "expect_stdout": ["+61400000002,Australia/Brisbane,ok,", "+61400000001,Australia/Sydney,excluded,duplicate", "+61400000006,Australia/Perth,excluded,on suppression"],
+       "expect_stderr": ["Rows: 10  ok: 3  review: 4  excluded: 3", "Wash age on 2026-11-09: 8 days"]},
+      {"kind": "empty", "args": ["tests/fixtures/outbound-call-campaign/empty.csv"], "expect_exit": [1], "expect_stderr": ["Input is empty"]},
+      {"kind": "missing-field", "args": ["tests/fixtures/outbound-call-campaign/missing-field.csv"], "expect_exit": [1], "expect_stderr": ["No phone column found"]},
+      {"kind": "edge", "args": ["tests/fixtures/outbound-call-campaign/messy.csv", "--as-of", "2026-11-09"], "expect_exit": [0],
+       "expect_stdout": ["Lee Extra,0400 000 012,QLD,+61400000012,Australia/Brisbane,ok,"], "expect_stderr": ["1 row(s) had more cells than the header", "BLOCK: no Do Not Call Register wash"]},
+      {"kind": "edge", "args": ["tests/fixtures/outbound-call-campaign/header-only.csv", "--out", "{tmp}/clean.csv"], "expect_exit": [0], "expect_stderr": ["No data rows"]},
+      {"kind": "edge", "args": ["tests/fixtures/outbound-call-campaign/call-list.csv", "--wash-date", "2026-13-01"], "expect_exit": [2], "expect_stderr": ["expected YYYY-MM-DD"]}
+    ]}}}

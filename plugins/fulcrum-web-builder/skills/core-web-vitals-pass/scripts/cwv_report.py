@@ -64,33 +64,57 @@ def fmt(metric: str, value: float | None) -> str:
 
 def load(path: str) -> dict:
     with open(path, encoding="utf-8") as fh:
-        data = json.load(fh)
-    if "lighthouseResult" in data:
-        return {"lhr": data["lighthouseResult"], "field": data.get("loadingExperience"), "origin": data.get("originLoadingExperience")}
-    if "audits" in data:
-        return {"lhr": data, "field": None, "origin": None}
-    raise ValueError("not a Lighthouse or PageSpeed Insights JSON file")
+        text = fh.read()
+    if not text.strip():
+        raise ValueError("file is empty")
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError("not a Lighthouse or PageSpeed Insights JSON file (top level is not an object)")
+    if isinstance(data.get("lighthouseResult"), dict):
+        lhr = data["lighthouseResult"]
+        field, origin = data.get("loadingExperience"), data.get("originLoadingExperience")
+    elif "audits" in data:
+        lhr, field, origin = data, None, None
+    else:
+        raise ValueError("not a Lighthouse or PageSpeed Insights JSON file (no 'audits' or 'lighthouseResult' key)")
+    if not isinstance(lhr.get("audits"), dict):
+        raise ValueError("'audits' is missing or is not an object")
+    return {
+        "lhr": lhr,
+        "field": field if isinstance(field, dict) else None,
+        "origin": origin if isinstance(origin, dict) else None,
+    }
+
+
+def _num(value: object) -> float | None:
+    """Return value as a float if it is a real number (not bool), else None."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
 
 
 def field_metrics(block: dict | None) -> dict:
-    out = {}
-    if not block or "metrics" not in block:
+    out: dict[str, float] = {}
+    metrics = block.get("metrics") if block else None
+    if not isinstance(metrics, dict):
         return out
     for name, (key, scale, _) in FIELD_KEYS.items():
-        m = block["metrics"].get(key)
-        if m and "percentile" in m:
-            out[name] = m["percentile"] * scale
+        m = metrics.get(key)
+        value = _num(m.get("percentile")) if isinstance(m, dict) else None
+        if value is not None:
+            out[name] = value * scale
     return out
 
 
 def lab_metrics(lhr: dict) -> dict:
     audits = lhr.get("audits", {})
-    out = {}
+    out: dict[str, float] = {}
     for name, ids in LAB_AUDITS:
         for aid in ids:
             a = audits.get(aid)
-            if a and isinstance(a.get("numericValue"), (int, float)):
-                out[name] = float(a["numericValue"])
+            value = _num(a.get("numericValue")) if isinstance(a, dict) else None
+            if value is not None:
+                out[name] = value
                 break
     return out
 
@@ -117,7 +141,7 @@ def find_snippet(obj) -> str | None:
 def lcp_element(lhr: dict) -> str | None:
     audits = lhr.get("audits", {})
     for aid in ("largest-contentful-paint-element", "lcp-breakdown-insight", "lcp-phases-insight", "lcp-discovery-insight"):
-        if aid in audits:
+        if isinstance(audits.get(aid), dict):
             s = find_snippet(audits[aid].get("details"))
             if s:
                 return s
@@ -125,28 +149,41 @@ def lcp_element(lhr: dict) -> str | None:
 
 
 def failing(lhr: dict, top: int) -> list[tuple[str, str, str, str]]:
-    rows = []
+    rows: list[tuple[float, str, str, str, str]] = []
     perf_ids = None
-    cat = lhr.get("categories", {}).get("performance")
+    cat = perf_category(lhr)
     if cat:
-        perf_ids = {ref["id"] for ref in cat.get("auditRefs", [])}
+        perf_ids = {ref.get("id") for ref in cat.get("auditRefs", []) if isinstance(ref, dict)}
     for aid, a in lhr.get("audits", {}).items():
-        if aid in METRIC_AUDIT_IDS:
+        if aid in METRIC_AUDIT_IDS or not isinstance(a, dict):
             continue
         if perf_ids is not None and aid not in perf_ids:
             continue
-        score = a.get("score")
-        mode = a.get("scoreDisplayMode")
-        if mode in ("notApplicable", "manual", "informative") and not a.get("metricSavings"):
+        raw = a.get("metricSavings")
+        savings: dict[str, float] = {}
+        if isinstance(raw, dict):
+            for k, v in raw.items():
+                n = _num(v)
+                if n:
+                    savings[str(k)] = n
+        # Informative audits often carry metricSavings of all zeros; only a
+        # non-zero saving makes them worth listing.
+        if a.get("scoreDisplayMode") in ("notApplicable", "manual", "informative", "error") and not savings:
             continue
+        score = _num(a.get("score"))
         if score is not None and score >= 0.9:
             continue
-        savings = a.get("metricSavings") or {}
         weight = savings.get("LCP", 0) + savings.get("FCP", 0) * 0.5 + savings.get("TBT", 0) + savings.get("INP", 0) + savings.get("CLS", 0) * 10000
-        sav = ", ".join(f"{k} {v:.3f}" if k == "CLS" else f"{k} {v:,.0f} ms" for k, v in savings.items() if v)
-        rows.append((weight, aid, a.get("title", ""), a.get("displayValue", ""), sav))
+        sav = ", ".join(f"{k} {v:.3f}" if k == "CLS" else f"{k} {v:,.0f} ms" for k, v in savings.items())
+        rows.append((weight, aid, str(a.get("title", "")), str(a.get("displayValue", "")), sav))
     rows.sort(key=lambda r: r[0], reverse=True)
     return [(aid, title, dv, sav) for _, aid, title, dv, sav in rows[:top]]
+
+
+def perf_category(lhr: dict) -> dict | None:
+    cats = lhr.get("categories")
+    cat = cats.get("performance") if isinstance(cats, dict) else None
+    return cat if isinstance(cat, dict) else None
 
 
 def report(path: str, top: int) -> dict:
@@ -155,11 +192,14 @@ def report(path: str, top: int) -> dict:
     lab = lab_metrics(lhr)
     field = field_metrics(d["field"])
     origin = field_metrics(d["origin"])
-    env = lhr.get("configSettings", {})
+    env = lhr.get("configSettings")
+    if not isinstance(env, dict):
+        env = {}
     print(f"== {path}")
     print(f"url: {lhr.get('finalDisplayedUrl') or lhr.get('finalUrl') or lhr.get('requestedUrl')}")
     print(f"lighthouse {lhr.get('lighthouseVersion', '?')}, form factor: {env.get('formFactor', '?')}, throttling: {env.get('throttlingMethod', '?')}")
-    perf = lhr.get("categories", {}).get("performance", {}).get("score")
+    cat = perf_category(lhr)
+    perf = _num(cat.get("score")) if cat else None
     if perf is not None:
         print(f"performance score: {perf * 100:.0f}")
     for label, data in (("field (this URL, p75, last 28 days)", field), ("field (origin, p75)", origin)):
@@ -193,11 +233,13 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
     if len(args.files) > 2:
         p.error("give one or two files")
+    if args.top < 0:
+        p.error("--top must be 0 or more")
     results = []
     for f in args.files:
         try:
             results.append(report(f, args.top))
-        except (OSError, ValueError, json.JSONDecodeError) as exc:
+        except (OSError, ValueError) as exc:  # JSONDecodeError and UnicodeDecodeError are ValueErrors
             print(f"error: {f}: {exc}", file=sys.stderr)
             return 2
     if len(results) == 2:

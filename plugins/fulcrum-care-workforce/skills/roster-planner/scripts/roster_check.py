@@ -34,6 +34,7 @@ import json
 import sys
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 DEFAULT_RULES = {
@@ -47,41 +48,100 @@ DEFAULT_RULES = {
 }
 
 
-def read_csv(path):
-    with open(path, newline="", encoding="utf-8-sig") as handle:
-        return [{(k or "").strip().lower(): (v or "").strip() for k, v in row.items()}
-                for row in csv.DictReader(handle)]
+NUMERIC_RULES = ["warn_within_days", "min_rest_hours", "max_shift_hours", "max_consecutive_days",
+                 "travel_buffer_minutes", "max_workers_per_client_week"]
+
+Row = Dict[str, str]
 
 
-def split(value):
+def read_csv(path: str, required: List[str], label: str) -> List[Tuple[int, Row]]:
+    """Return (line number, row) pairs with lower-cased keys; cells beyond the header are ignored."""
+    try:
+        with open(path, newline="", encoding="utf-8-sig") as handle:
+            reader = csv.DictReader(handle)
+            headers = {h.strip().lower() for h in (reader.fieldnames or []) if h}
+            if not headers:
+                raise SystemExit(f"{label} file {path} is empty: expected a header row with {', '.join(required)}")
+            missing = [c for c in required if c not in headers]
+            if missing:
+                raise SystemExit(f"{label} file {path} is missing columns: {', '.join(missing)}")
+            rows: List[Tuple[int, Row]] = []
+            for row in reader:
+                clean = {k.strip().lower(): (v or "").strip() for k, v in row.items() if isinstance(k, str)}
+                if any(clean.values()):
+                    rows.append((reader.line_num, clean))
+            return rows
+    except FileNotFoundError:
+        raise SystemExit(f"{label} file not found: {path}") from None
+    except (OSError, UnicodeDecodeError, csv.Error) as exc:
+        raise SystemExit(f"{label} file {path} could not be read: {exc}") from None
+
+
+def load_rules(path: Optional[str]) -> Dict[str, Any]:
+    rules: Dict[str, Any] = dict(DEFAULT_RULES)
+    if not path:
+        return rules
+    try:
+        with open(path, encoding="utf-8-sig") as handle:
+            loaded = json.load(handle)
+    except FileNotFoundError:
+        raise SystemExit(f"rules file not found: {path}") from None
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"rules file {path} is not valid JSON: {exc}") from None
+    except (OSError, UnicodeDecodeError) as exc:
+        raise SystemExit(f"rules file {path} could not be read: {exc}") from None
+    if not isinstance(loaded, dict):
+        raise SystemExit(f"rules file {path} must contain a JSON object")
+    rules.update(loaded)
+    for key in NUMERIC_RULES:
+        value = rules[key]
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+            raise SystemExit(f"rules file {path}: {key} must be a number of 0 or more, not {value!r}")
+    required = rules["required_for_all"]
+    if not isinstance(required, list) or not all(isinstance(x, str) for x in required):
+        raise SystemExit(f"rules file {path}: required_for_all must be a list of names")
+    return rules
+
+
+def split(value: Optional[str]) -> List[str]:
     return [part.strip() for part in (value or "").split(";") if part.strip()]
 
 
-def parse_dt(value):
+def parse_dt(value: str) -> datetime:
     return datetime.strptime(value, "%Y-%m-%d %H:%M")
 
 
-def parse_clock(value):
+def parse_clock(value: str) -> time:
+    value = value.strip()
     if value == "24:00":
         return time(23, 59, 59)
     return datetime.strptime(value, "%H:%M").time()
 
 
-def parse_availability(text):
-    """Return {weekday_index: [(start_time, end_time), ...]} or None when unknown."""
+def parse_availability(text: Optional[str]) -> Optional[Dict[int, List[Tuple[time, time]]]]:
+    """Return {weekday_index: [(start_time, end_time), ...]} or None when unknown.
+
+    Raises ValueError for a window that is not "Day HH:MM-HH:MM".
+    """
     if not text:
         return None
-    windows = defaultdict(list)
+    windows: Dict[int, List[Tuple[time, time]]] = defaultdict(list)
     for chunk in split(text):
         day, _, span = chunk.partition(" ")
-        start, _, end = span.partition("-")
-        windows[DAYS.index(day[:3].title())].append((parse_clock(start), parse_clock(end)))
+        start, _, end = span.strip().partition("-")
+        if day[:3].title() not in DAYS:
+            raise ValueError(f"unknown day in availability window {chunk!r}")
+        try:
+            window = (parse_clock(start), parse_clock(end))
+        except ValueError:
+            raise ValueError(f"availability window {chunk!r} is not 'Day HH:MM-HH:MM'") from None
+        windows[DAYS.index(day[:3].title())].append(window)
     return windows
 
 
-def segments(start, end):
+def segments(start: datetime, end: datetime) -> List[Tuple[datetime, datetime]]:
     """Split a shift into per-day pieces so overnight shifts are checked on both days."""
-    pieces = []
+    pieces: List[Tuple[datetime, datetime]] = []
     cursor = start
     while cursor < end:
         day_end = datetime.combine(cursor.date() + timedelta(days=1), time(0, 0))
@@ -91,7 +151,7 @@ def segments(start, end):
     return pieces
 
 
-def is_available(windows, start, end):
+def is_available(windows: Optional[Dict[int, List[Tuple[time, time]]]], start: datetime, end: datetime) -> Optional[bool]:
     if windows is None:
         return None
     for seg_start, seg_end in segments(start, end):
@@ -101,11 +161,11 @@ def is_available(windows, start, end):
     return True
 
 
-def hours(shift):
+def hours(shift: Dict[str, Any]) -> float:
     return (shift["end"] - shift["start"]).total_seconds() / 3600
 
 
-def main(argv=None):
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="Check a draft care roster for conflicts and rank candidates for open shifts (report only).",
         epilog="Example: python3 roster_check.py --shifts shifts.csv --workers workers.csv "
@@ -118,47 +178,92 @@ def main(argv=None):
     parser.add_argument("--top", type=int, default=3, help="candidates to list per open shift (default 3)")
     parser.add_argument("--format", choices=["md", "json"], default="md")
     args = parser.parse_args(argv)
+    if args.top < 0:
+        parser.error("--top must be 0 or more")
 
-    rules = dict(DEFAULT_RULES)
-    if args.rules:
-        with open(args.rules, encoding="utf-8") as handle:
-            rules.update(json.load(handle))
+    rules = load_rules(args.rules)
+    problems: List[str] = []
 
-    workers = {}
-    for w in read_csv(args.workers):
-        compliance = {}
-        for item in split(w.get("compliance")):
-            key, _, expiry = item.partition("=")
-            compliance[key.strip()] = datetime.strptime(expiry.strip(), "%Y-%m-%d").date() if expiry.strip() else None
+    def bad_row(label: str, line: int, detail: str) -> None:
+        problems.append(f"{label} line {line}: {detail}; row skipped")
+        print(f"warning: {label} line {line}: {detail}; row skipped", file=sys.stderr)
+
+    workers: Dict[str, Dict[str, Any]] = {}
+    for line, w in read_csv(args.workers, ["worker_id", "skills", "compliance"], "workers"):
+        if not w["worker_id"]:
+            bad_row("workers", line, "worker_id blank")
+            continue
+        try:
+            compliance: Dict[str, Optional[date]] = {}
+            for item in split(w.get("compliance")):
+                key, _, expiry = item.partition("=")
+                try:
+                    compliance[key.strip()] = datetime.strptime(expiry.strip(), "%Y-%m-%d").date() if expiry.strip() else None
+                except ValueError:
+                    raise ValueError(f"compliance expiry {item!r} is not name=YYYY-MM-DD") from None
+            try:
+                max_hours = float(w["max_hours_week"]) if w.get("max_hours_week") else None
+            except ValueError:
+                raise ValueError(f"max_hours_week {w['max_hours_week']!r} is not a number") from None
+            availability = parse_availability(w.get("availability"))
+        except ValueError as exc:
+            bad_row("workers", line, f"{w['worker_id']}: {exc}")
+            continue
         workers[w["worker_id"]] = {
             "id": w["worker_id"], "name": w.get("name") or w["worker_id"], "skills": set(split(w.get("skills"))),
-            "max_hours": float(w["max_hours_week"]) if w.get("max_hours_week") else None,
-            "availability": parse_availability(w.get("availability")), "compliance": compliance,
+            "max_hours": max_hours, "availability": availability, "compliance": compliance,
         }
-    clients = {c["client_ref"]: c for c in read_csv(args.clients)} if args.clients else {}
+    clients: Dict[str, Row] = {}
+    for line, c in (read_csv(args.clients, ["client_ref"], "clients") if args.clients else []):
+        cap = c.get("max_workers_week", "")
+        if cap and not cap.isdigit():
+            print(f"warning: clients line {line}: max_workers_week {cap!r} is not a whole number; "
+                  "using the rules file setting", file=sys.stderr)
+            c["max_workers_week"] = ""
+        clients[c["client_ref"]] = c
 
-    shifts = []
-    for s in read_csv(args.shifts):
-        shift = {"id": s["shift_id"], "client": s["client_ref"], "start": parse_dt(s["start"]),
-                 "end": parse_dt(s["end"]), "location": s.get("location", ""),
+    shifts: List[Dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for line, s in read_csv(args.shifts, ["shift_id", "client_ref", "start", "end"], "shifts"):
+        if not s["shift_id"] or not s["client_ref"]:
+            bad_row("shifts", line, "shift_id or client_ref blank")
+            continue
+        if s["shift_id"] in seen_ids:
+            bad_row("shifts", line, f"shift_id {s['shift_id']} appears more than once")
+            continue
+        try:
+            start, end = parse_dt(s["start"]), parse_dt(s["end"])
+        except ValueError:
+            bad_row("shifts", line, f"{s['shift_id']}: start {s['start']!r} or end {s['end']!r} is not YYYY-MM-DD HH:MM")
+            continue
+        if end <= start:
+            bad_row("shifts", line, f"{s['shift_id']}: end must be after start "
+                                    "(write overnight shifts with the next day's date)")
+            continue
+        seen_ids.add(s["shift_id"])
+        shift = {"id": s["shift_id"], "client": s["client_ref"], "start": start,
+                 "end": end, "location": s.get("location", ""),
                  "skills": set(split(s.get("required_skills"))),
                  "compliance": set(rules["required_for_all"]) | set(split(s.get("required_compliance"))),
                  "worker": s.get("worker_id", "")}
-        if shift["end"] <= shift["start"]:
-            raise SystemExit(f"shift {shift['id']}: end must be after start (write overnight shifts with the next day's date)")
         shifts.append(shift)
     shifts.sort(key=lambda x: x["start"])
     roster_end = max((s["end"].date() for s in shifts), default=date.today())
 
-    findings = []
+    findings: List[Dict[str, str]] = []
 
-    def add(severity, kind, shift_id, worker_id, detail):
+    def add(severity: str, kind: str, shift_id: str, worker_id: str, detail: str) -> None:
         findings.append({"severity": severity, "type": kind, "shift": shift_id,
                          "worker": workers.get(worker_id, {}).get("name", worker_id), "detail": detail})
 
-    def worker_issues(w, shift, assigned):
+    for problem in problems:
+        add("high", "BAD_DATA", "-", "", problem)
+
+    def worker_issues(w: Dict[str, Any], shift: Dict[str, Any],
+                      assigned: List[Dict[str, Any]]) -> Tuple[List[Tuple[str, str]], List[Tuple[str, str]]]:
         """Return hard blockers for putting worker w on shift, given their other assignments."""
-        blockers, warnings = [], []
+        blockers: List[Tuple[str, str]] = []
+        warnings: List[Tuple[str, str]] = []
         missing_skills = shift["skills"] - w["skills"]
         if missing_skills:
             blockers.append(("SKILL_MISMATCH", f"lacks {', '.join(sorted(missing_skills))}"))
@@ -200,7 +305,7 @@ def main(argv=None):
                     blockers.append(("SHORT_REST", f"{gap_text} between {first['id']} and {second['id']} (setting {rules['min_rest_hours']} h)"))
         return blockers, warnings
 
-    by_worker = defaultdict(list)
+    by_worker: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for s in shifts:
         if s["worker"]:
             by_worker[s["worker"]].append(s)
@@ -214,7 +319,7 @@ def main(argv=None):
             add("high", "UNKNOWN_WORKER", s["id"], s["worker"], "worker not in workers file")
             continue
         blockers, warnings = worker_issues(w, s, by_worker[s["worker"]])
-        seen = set()
+        seen: set[Tuple[str, str]] = set()
         for kind, detail in blockers:
             key = (kind, detail)
             if key not in seen:
@@ -227,7 +332,7 @@ def main(argv=None):
                 add("medium" if kind != "AVAILABILITY_UNKNOWN" else "low", kind, s["id"], s["worker"], detail)
 
     # Weekly hours and consecutive days per worker.
-    hours_by_worker = {}
+    hours_by_worker: Dict[str, float] = {}
     for wid, assigned in by_worker.items():
         total = sum(hours(s) for s in assigned)
         hours_by_worker[wid] = total
@@ -243,7 +348,7 @@ def main(argv=None):
             add("medium", "CONSECUTIVE_DAYS", "-", wid, f"{best} days in a row (setting {rules['max_consecutive_days']})")
 
     # Continuity of care.
-    continuity = {}
+    continuity: Dict[str, List[str]] = {}
     for client in sorted({s["client"] for s in shifts}):
         names = sorted({s["worker"] for s in shifts if s["client"] == client and s["worker"]})
         continuity[client] = names
@@ -254,11 +359,11 @@ def main(argv=None):
     # Candidates for open shifts and for shifts with hard conflicts.
     order = {"high": 0, "medium": 1, "low": 2}
     hard_shift_ids = {f["shift"] for f in findings if f["severity"] == "high" and f["shift"] != "-"}
-    suggestions = {}
+    suggestions: Dict[str, List[Dict[str, Any]]] = {}
     for s in shifts:
         if s["id"] not in hard_shift_ids:
             continue
-        ranked = []
+        ranked: List[Tuple[int, float, str, str, List[str]]] = []
         for wid, w in workers.items():
             if wid == s["worker"]:
                 continue
@@ -270,7 +375,7 @@ def main(argv=None):
                 continue
             prefs = clients.get(s["client"], {})
             score = 0
-            reasons = []
+            reasons: List[str] = []
             if wid in split(prefs.get("preferred_workers")):
                 score += 3
                 reasons.append("client's preferred worker")

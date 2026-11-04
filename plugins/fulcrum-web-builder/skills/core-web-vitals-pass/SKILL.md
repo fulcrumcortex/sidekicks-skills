@@ -12,6 +12,7 @@ Moves a page's real-user p75 metrics into the "good" band: LCP at or below 2.5 s
 - Search Console's Core Web Vitals report lists poor or "needs improvement" URLs.
 - PageSpeed Insights shows failing field data, or a launch needs a performance check.
 - Not for: a generic Lighthouse score chase with passing field data (say so and stop), server infrastructure sizing, or SEO markup (`seo-structured-data-audit`).
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

@@ -1,0 +1,18 @@
+{"scripts": {"plugins/fulcrum-property/skills/lease-billing-check/scripts/rent_schedule.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["plugins/fulcrum-property/skills/lease-billing-check/assets/lease-terms-example.json", "--billed", "tests/fixtures/lease-billing-check/billed.csv"],
+       "expect_exit": [0],
+       "expect_stdout": ["- 2026-07-01: annual rent 128185.34 (CPI +2.713%)", "| 2024-08-01 | 2024-08-31 | 120000.0 | 0.0 | 2580.65 | 258.06 | prorated |", "| 2025-07-01 | 2025-07-31 | 124800.0 | 100.0 | 10400.0 | 1040.0 |  | 10000.0 | -400.0 | 1000.0 | -40.0 | MISMATCH |", "| 2026-07-01 | 2026-07-31 | 128185.34 | 100.0 | 10682.11 | 1068.21 |  | 10682.11 | 0.0 | 1068.21 | 0.0 | ok |", "BILLED, NO MATCHING PERIOD", "matched periods): -800.00"]},
+      {"kind": "empty", "args": ["plugins/fulcrum-property/skills/lease-billing-check/assets/lease-terms-example.json", "--billed", "tests/fixtures/lease-billing-check/empty.csv"],
+       "expect_exit": [2], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["plugins/fulcrum-property/skills/lease-billing-check/assets/lease-terms-example.json", "--billed", "tests/fixtures/lease-billing-check/missing-field.csv"],
+       "expect_exit": [2], "expect_stderr": ["missing columns: rent_billed"]},
+      {"kind": "edge", "args": ["plugins/fulcrum-property/skills/lease-billing-check/assets/lease-terms-example.json", "--billed", "tests/fixtures/lease-billing-check/bad-billed.csv", "--only-mismatches"],
+       "expect_exit": [0], "expect_stdout": ["matched periods): 0.00"], "expect_stderr": ["'01/08/2025' is not a YYYY-MM-DD date; row skipped", "'TBC' is not a number", "a number is required"]},
+      {"kind": "edge", "args": ["tests/fixtures/lease-billing-check/bad-terms.json"],
+       "expect_exit": [2], "expect_stderr": ["CPI index numbers must be greater than zero"]},
+      {"kind": "edge", "args": ["tests/fixtures/lease-billing-check/broken-terms.txt"],
+       "expect_exit": [2], "expect_stderr": ["is not valid JSON"]}
+    ]}}}

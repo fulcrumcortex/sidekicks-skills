@@ -18,11 +18,17 @@ GST is calculated per line and rounded to the cent (half up), then summed.
 --not-registered: the business is not registered for GST, so no GST is
 charged and the quote must not show any.
 
+A line with a blank or unreadable qty, unit_price or discount_pct is left
+out and listed under "Lines not included"; the script then exits with
+status 1 so the totals are not used until the line is fixed.
+
 Examples:
   python3 quote_totals.py lines.csv
   python3 quote_totals.py lines.csv --prices inc --deposit 20
   python3 quote_totals.py lines.csv --not-registered
 """
+
+from __future__ import annotations
 
 import argparse
 import csv
@@ -34,11 +40,33 @@ CENT = Decimal("0.01")
 RATE = Decimal("0.10")
 
 
-def d(value, field, line):
+class LineError(ValueError):
+    """A line item that cannot be priced."""
+
+
+def d(value, field, default=None):
+    text = (value or "").replace("$", "").replace(",", "").strip()
+    if not text:
+        if default is None:
+            raise LineError(f"{field} is blank")
+        return default
     try:
-        return Decimal(str(value).replace("$", "").replace(",", "").strip() or "0")
+        number = Decimal(text)
     except InvalidOperation:
-        sys.exit(f"Line {line}: '{value}' is not a number in column {field}")
+        raise LineError(f"'{value}' is not a number in column {field}") from None
+    if not number.is_finite():
+        raise LineError(f"'{value}' is not a number in column {field}")
+    return number
+
+
+def percent(value):
+    try:
+        number = Decimal(value)
+    except InvalidOperation:
+        raise argparse.ArgumentTypeError(f"expected a percentage such as 20, got '{value}'") from None
+    if not number.is_finite() or not 0 <= number <= 100:
+        raise argparse.ArgumentTypeError(f"must be between 0 and 100, got '{value}'")
+    return number
 
 
 def r(x):
@@ -54,21 +82,43 @@ def main():
     ap.add_argument("input", help="line items CSV, or - for stdin")
     ap.add_argument("--prices", choices=["ex", "inc"], default="ex", help="unit prices exclude (ex) or include (inc) GST")
     ap.add_argument("--not-registered", action="store_true", help="business is not registered for GST")
-    ap.add_argument("--deposit", type=Decimal, help="deposit as a percentage of the total, e.g. 20")
+    ap.add_argument("--deposit", type=percent, help="deposit as a percentage of the total, e.g. 20")
     args = ap.parse_args()
 
-    fh = sys.stdin if args.input == "-" else open(args.input, newline="", encoding="utf-8-sig")
-    reader = csv.DictReader(fh)
-    reader.fieldnames = [f.strip().lower() for f in (reader.fieldnames or [])]
+    try:
+        fh = sys.stdin if args.input == "-" else open(args.input, newline="", encoding="utf-8-sig")
+    except OSError as e:
+        sys.exit(f"Cannot open {args.input}: {e.strerror}")
+    try:
+        reader = csv.DictReader(fh)
+        fieldnames = [f.strip().lower() for f in (reader.fieldnames or []) if f is not None]
+        reader.fieldnames = fieldnames
+        rows = list(reader)
+    except (UnicodeDecodeError, csv.Error) as e:
+        sys.exit(f"Cannot read {args.input} as CSV: {e}")
+    finally:
+        if fh is not sys.stdin:
+            fh.close()
+    if not fieldnames:
+        sys.exit("Input is empty: expected a CSV with description, qty and unit_price columns.")
     for need in ("description", "qty", "unit_price"):
-        if need not in reader.fieldnames:
-            sys.exit(f"Missing column '{need}'. Found: {', '.join(reader.fieldnames)}")
+        if need not in fieldnames:
+            sys.exit(f"Missing column '{need}'. Found: {', '.join(fieldnames)}")
 
-    lines, options = [], OrderedDict()
-    for n, row in enumerate(reader, start=2):
-        qty = d(row["qty"], "qty", n)
-        unit = d(row["unit_price"], "unit_price", n)
-        disc = d(row.get("discount_pct") or 0, "discount_pct", n)
+    lines, options, problems = [], OrderedDict(), []
+    for n, row in enumerate(rows, start=2):
+        if not any((v or "").strip() for k, v in row.items() if k is not None):
+            continue
+        desc = (row.get("description") or "").strip()
+        try:
+            qty = d(row.get("qty"), "qty")
+            unit = d(row.get("unit_price"), "unit_price")
+            disc = d(row.get("discount_pct"), "discount_pct", Decimal(0))
+            if not 0 <= disc <= 100:
+                raise LineError(f"discount_pct {disc:g} is outside 0-100")
+        except LineError as e:
+            problems.append(f"line {n} ({desc or 'no description'}): {e}")
+            continue
         taxable = (row.get("gst") or "Y").strip().upper() not in ("N", "NO", "FREE", "GST-FREE", "0")
         gross = qty * unit * (Decimal(100) - disc) / Decimal(100)
         if args.not_registered or not taxable:
@@ -83,9 +133,12 @@ def main():
         opt = (row.get("option") or "").strip()
         if opt:
             options.setdefault(opt, None)
-        lines.append({"desc": row["description"].strip(), "qty": qty, "unit": unit, "disc": disc,
+        lines.append({"desc": desc or "(no description)", "qty": qty, "unit": unit, "disc": disc,
                       "taxable": taxable and not args.not_registered, "ex": ex, "gst": gst, "opt": opt})
 
+    if not lines and not problems:
+        print("No line items: the CSV has a header row but no lines.")
+        return
     groups = list(options) or [""]
     for g in groups:
         sel = [l for l in lines if l["opt"] in ("", g)]
@@ -118,6 +171,14 @@ def main():
             dep = r(total * args.deposit / Decimal(100))
             print(f"Deposit {args.deposit:g}%: ${fmt(dep)}   Balance: ${fmt(total - dep)}")
         print()
+    if problems:
+        print("## Lines not included\n")
+        for p in problems:
+            print(f"- {p}")
+        print("\nWARNING: the totals above leave these lines out. Fix them and re-run before quoting.")
+        for p in problems:
+            print(f"Not included: {p}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

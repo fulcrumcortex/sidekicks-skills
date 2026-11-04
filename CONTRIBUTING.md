@@ -19,6 +19,7 @@ plugins/<plugin-name>/
 - Frontmatter holds only `name` and `description`. Some hosts ignore other fields.
 - `SKILL.md` links to every reference file it uses, with a line saying when to read it. References link one level deep; they do not chain to further references.
 - Scripts run with `python3 script.py --help`, read input from files or stdin, write to stdout, and make no network calls.
+- Every script has smoke cases in `tests/smoke/<skill>.json` (help, a realistic sample, empty input and a missing-field input) with fixtures in `tests/fixtures/<skill>/`. Bad input produces a clear message and a non-zero exit code, never a traceback. Run `pyright` on new scripts; they should report no errors.
 
 ## SKILL.md template
 
@@ -95,7 +96,7 @@ N. **Approval gate.** <Present exactly what will go out, to whom and from which 
 ## Validate
 
 ```bash
-python3 scripts/validate.py            # structure, JSON, banned words, links
+python3 scripts/validate.py            # structure, JSON, banned words, links, script smoke tests
 python3 scripts/validate.py --offline  # skip the link check
 python3 scripts/check_catalog.py       # showcase index for the starter pack
 claude plugin validate .               # if Claude Code is installed

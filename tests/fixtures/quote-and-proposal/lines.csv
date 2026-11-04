@@ -1,0 +1,6 @@
+description,qty,unit_price,gst,discount_pct,option
+Site survey and measure,1,180.00,Y,,
+Supply and install split system 2.5kW,1,"1,450.00",Y,,Good
+Supply and install split system 3.5kW,1,"1,890.00",Y,5,Better
+Labour (hours),2.5,95.00,Y,,
+Disposal of old unit,1,60.00,N,,

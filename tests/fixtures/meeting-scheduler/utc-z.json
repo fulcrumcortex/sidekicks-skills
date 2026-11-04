@@ -1,0 +1,8 @@
+{"duration_minutes": 60, "min_notice_minutes": 0,
+ "search": {"start": "2026-11-09", "end": "2026-11-09", "timezone": "Australia/Sydney"},
+ "now": "2026-11-08T00:00:00Z",
+ "participants": [
+   {"name": "Owner (Sydney)", "timezone": "Australia/Sydney",
+    "working_hours": {"mon": [["09:00", "11:00"]]},
+    "busy": [{"start": "2026-11-08T22:00:00Z", "end": "2026-11-08T23:00:00Z"}]},
+   {"name": "Client (Auckland)", "timezone": "Pacific/Auckland", "required": false}]}

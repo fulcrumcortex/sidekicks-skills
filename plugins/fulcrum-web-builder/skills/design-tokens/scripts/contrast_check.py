@@ -26,7 +26,7 @@ With --scope dark, declarations inside selectors or at-rules that mention
 "dark" override the light values.
 
 Exit status: 0 if every pair meets AA for its use, 1 if any pair fails,
-2 on input errors.
+2 on input errors (bad rows are reported, skipped, and make the exit 2).
 """
 
 from __future__ import annotations
@@ -37,6 +37,7 @@ import math
 import re
 import sys
 
+RGB = tuple[float, float, float]  # subscripting tuple at runtime needs Python 3.9+
 THRESHOLDS = {"text": (4.5, 7.0), "large": (3.0, 4.5), "ui": (3.0, None)}
 
 
@@ -51,6 +52,10 @@ def _num(token: str, scale: float = 1.0) -> float:
     if token.endswith("%"):
         return float(token[:-1]) / 100.0 * scale
     return float(token)
+
+
+def _clamp01(c: float) -> float:
+    return min(1.0, max(0.0, c))
 
 
 def _srgb_to_linear(c: float) -> float:
@@ -73,8 +78,8 @@ def oklch_to_srgb(L: float, C: float, H: float) -> tuple[tuple[float, float, flo
         -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_,
     )
     clipped = any(c < -1e-4 or c > 1 + 1e-4 for c in lin)
-    rgb = tuple(_linear_to_srgb(min(1.0, max(0.0, c))) for c in lin)
-    return rgb, clipped  # type: ignore[return-value]
+    r, g, b = (_linear_to_srgb(_clamp01(c)) for c in lin)
+    return (r, g, b), clipped
 
 
 def srgb_to_oklch(rgb: tuple[float, float, float]) -> tuple[float, float, float]:
@@ -115,9 +120,9 @@ def parse_colour(text: str) -> tuple[tuple[float, float, float], float, list[str
             h = "".join(ch * 2 for ch in h)
         if len(h) not in (6, 8) or not re.fullmatch(r"[0-9a-f]+", h):
             raise ColourError(f"bad hex colour: {text}")
-        rgb = tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+        r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
         alpha = int(h[6:8], 16) / 255 if len(h) == 8 else 1.0
-        return rgb, alpha, warnings  # type: ignore[return-value]
+        return (r, g, b), alpha, warnings
     m = re.fullmatch(r"(rgba?|hsla?|oklch)\((.*)\)", s)
     if not m:
         raise ColourError(f"unsupported colour: {text}")
@@ -132,15 +137,17 @@ def parse_colour(text: str) -> tuple[tuple[float, float, float], float, list[str
             alpha = _num(parts.pop())
         if len(parts) != 3:
             raise ColourError(f"bad rgb(): {text}")
-        rgb = tuple(_num(p, 255) / 255 if p.endswith("%") else float(p) / 255 for p in parts)
-        return rgb, alpha, warnings  # type: ignore[return-value]
+        r, g, b = (_clamp01(_num(p, 255) / 255) for p in parts)
+        return (r, g, b), _clamp01(alpha), warnings
     if fn.startswith("hsl"):
         if len(parts) == 4:
             alpha = _num(parts.pop())
         if len(parts) != 3:
             raise ColourError(f"bad hsl(): {text}")
         h = float(parts[0].replace("deg", ""))
-        return _hsl_to_rgb(h, _num(parts[1]), _num(parts[2])), alpha, warnings
+        # CSS Color 4 allows bare numbers (0-100) for saturation and lightness.
+        sat, light = (_clamp01(_num(p) if p.endswith("%") else float(p) / 100) for p in parts[1:])
+        return _hsl_to_rgb(h, sat, light), _clamp01(alpha), warnings
     if len(parts) != 3:
         raise ColourError(f"bad oklch(): {text}")
     L = _num(parts[0])
@@ -149,7 +156,7 @@ def parse_colour(text: str) -> tuple[tuple[float, float, float], float, list[str
     rgb, clipped = oklch_to_srgb(L, C, H)
     if clipped:
         warnings.append(f"{text} is outside sRGB and was clipped; reduce chroma for a predictable result")
-    return rgb, alpha, warnings
+    return rgb, _clamp01(alpha), warnings
 
 
 # ---------- WCAG maths ----------
@@ -164,11 +171,12 @@ def ratio(fg: tuple[float, float, float], bg: tuple[float, float, float]) -> flo
     return (l1 + 0.05) / (l2 + 0.05)
 
 
-def composite(fg, alpha, bg):
-    return tuple(alpha * f + (1 - alpha) * b for f, b in zip(fg, bg))
+def composite(fg: RGB, alpha: float, bg: RGB) -> RGB:
+    r, g, b = (alpha * f + (1 - alpha) * k for f, k in zip(fg, bg))
+    return (r, g, b)
 
 
-def suggest(fg_rgb, bg_rgb, target: float) -> str | None:
+def suggest(fg_rgb: RGB, bg_rgb: RGB, target: float) -> str | None:
     """Move the foreground's OKLCH lightness away from the background until it passes."""
     L, C, H = srgb_to_oklch(fg_rgb)
     darker = luminance(bg_rgb) > 0.18
@@ -240,7 +248,7 @@ def resolve(value: str, tokens: dict[str, str], depth: int = 0) -> str:
 
 # ---------- reporting ----------
 
-def check(fg_text: str, bg_text: str, use: str, label: str, tokens, want_suggest: bool):
+def check(fg_text: str, bg_text: str, use: str, label: str, tokens: dict[str, str], want_suggest: bool) -> dict:
     if use not in THRESHOLDS:
         raise ColourError(f"use must be one of {', '.join(THRESHOLDS)}, got {use!r}")
     fg_rgb, fg_a, w1 = parse_colour(resolve(fg_text, tokens))
@@ -268,6 +276,36 @@ def check(fg_text: str, bg_text: str, use: str, label: str, tokens, want_suggest
     return row
 
 
+def read_pairs(path: str) -> tuple[list[tuple[str, str, str, str]], int]:
+    """Read fg,bg,use[,label] rows. Bad rows are reported to stderr and skipped."""
+    jobs: list[tuple[str, str, str, str]] = []
+    bad = 0
+    with open(path, newline="", encoding="utf-8-sig") as fh:
+        reader = csv.DictReader(fh)
+        if not reader.fieldnames:
+            raise ValueError("file is empty; expected a header row fg,bg,use[,label]")
+        header = {(f or "").strip().lower() for f in reader.fieldnames}
+        missing = [c for c in ("fg", "bg") if c not in header]
+        if missing:
+            raise ValueError(f"missing required column(s): {', '.join(missing)} (header must be fg,bg,use[,label])")
+        for line, rec in enumerate(reader, 2):
+            rec = {(k or "").strip().lower(): (v if isinstance(v, str) else "") for k, v in rec.items() if k is not None}
+            fg, bg = rec.get("fg", "").strip(), rec.get("bg", "").strip()
+            if not fg and not bg and not any(v.strip() for v in rec.values()):
+                continue  # blank line
+            if not fg or not bg:
+                print(f"error: {path} line {line}: blank fg or bg; row skipped", file=sys.stderr)
+                bad += 1
+                continue
+            use = (rec.get("use") or "text").strip().lower()
+            if use not in THRESHOLDS:
+                print(f"error: {path} line {line}: use must be one of {', '.join(THRESHOLDS)}, got {use!r}; row skipped", file=sys.stderr)
+                bad += 1
+                continue
+            jobs.append((fg, bg, use, (rec.get("label") or "").strip()))
+    return jobs, bad
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("fg", nargs="?", help="foreground colour or token")
@@ -281,14 +319,24 @@ def main(argv: list[str] | None = None) -> int:
 
     tokens: dict[str, str] = {}
     if args.css:
-        with open(args.css, encoding="utf-8") as fh:
-            tokens = load_tokens(fh.read(), args.scope)
+        try:
+            with open(args.css, encoding="utf-8") as fh:
+                tokens = load_tokens(fh.read(), args.scope)
+        except (OSError, UnicodeDecodeError) as exc:
+            print(f"error: cannot read --css {args.css}: {exc}", file=sys.stderr)
+            return 2
 
     jobs: list[tuple[str, str, str, str]] = []
+    bad_rows = 0
     if args.pairs:
-        with open(args.pairs, newline="", encoding="utf-8") as fh:
-            for rec in csv.DictReader(fh):
-                jobs.append((rec["fg"], rec["bg"], (rec.get("use") or "text").strip(), (rec.get("label") or "").strip()))
+        try:
+            jobs, bad_rows = read_pairs(args.pairs)
+        except (OSError, UnicodeDecodeError, csv.Error, ValueError) as exc:
+            print(f"error: {args.pairs}: {exc}", file=sys.stderr)
+            return 2
+        if not jobs:
+            print(f"no pairs to check in {args.pairs}")
+            return 2 if bad_rows else 0
     elif args.fg and args.bg:
         jobs.append((args.fg, args.bg, args.use, ""))
     else:
@@ -297,19 +345,27 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     failures = 0
+    errors = bad_rows
     print(f"{'pair':<44} {'use':<6} {'ratio':>7}  {'AA':<5} {'AAA':<5} suggestion")
     for fg, bg, use, label in jobs:
         try:
             row = check(fg, bg, use, label, tokens, args.suggest)
         except (ColourError, ValueError) as exc:
+            # Report the bad pair and keep checking the rest.
             print(f"error: {label or fg + ' on ' + bg}: {exc}", file=sys.stderr)
-            return 2
+            errors += 1
+            continue
         failures += row["aa"] == "FAIL"
         print(f"{row['label'][:44]:<44} {row['use']:<6} {row['ratio']:>6.2f}:1  {row['aa']:<5} {row['aaa']:<5} {row['suggest']}")
         for w in row["warnings"]:
             print(f"  warning: {w}")
-    print(f"\n{len(jobs)} pair(s) checked, {failures} failing AA ({args.scope} scope)" if args.css else
-          f"\n{len(jobs)} pair(s) checked, {failures} failing AA")
+    checked = len(jobs) - (errors - bad_rows)
+    summary = f"\n{checked} pair(s) checked, {failures} failing AA"
+    if errors:
+        summary += f", {errors} skipped with errors"
+    print(summary + (f" ({args.scope} scope)" if args.css else ""))
+    if errors:
+        return 2
     return 1 if failures else 0
 
 

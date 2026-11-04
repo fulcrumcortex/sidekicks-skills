@@ -1,0 +1,17 @@
+{"scripts": {"plugins/fulcrum-web-builder/skills/core-web-vitals-pass/scripts/cwv_report.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["tests/fixtures/core-web-vitals-pass/psi-before.json"], "expect_exit": [0],
+     "expect_stdout": ["performance score: 62", "LCP     3,100 ms  needs improvement", "CLS        0.120  needs improvement", "LCP     4,212 ms  poor", "[render-blocking-resources]  (Potential savings of 610 ms | FCP 600 ms, LCP 600 ms)", "lcp element: <img src=\"/hero.jpg\""]},
+    {"kind": "sample", "args": ["tests/fixtures/core-web-vitals-pass/psi-before.json", "tests/fixtures/core-web-vitals-pass/lighthouse-after.json"], "expect_exit": [0],
+     "expect_stdout": ["performance score: 91", "LCP     4,212 ms ->   2,381 ms  (-1,832 ms)", "TBT       380 ms ->     150 ms  (-230 ms)", "CLS        0.080 ->      0.020  (-0.060)"]},
+    {"kind": "empty", "args": ["tests/fixtures/core-web-vitals-pass/empty-report.txt"], "expect_exit": [2],
+     "expect_stderr": ["file is empty"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/core-web-vitals-pass/missing-field.json"], "expect_exit": [2],
+     "expect_stderr": ["no 'audits' or 'lighthouseResult' key"]},
+    {"kind": "edge", "args": ["tests/fixtures/core-web-vitals-pass/truncated-report.txt"], "expect_exit": [2],
+     "expect_stderr": ["truncated-report.txt", "Expecting"]},
+    {"kind": "edge", "args": ["tests/fixtures/core-web-vitals-pass/odd-values.json"], "expect_exit": [0],
+     "expect_stdout": ["CLS        0.310  poor", "[uses-text-compression]"]}
+  ]}}}

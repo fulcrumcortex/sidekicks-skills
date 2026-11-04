@@ -1,0 +1,14 @@
+{"scripts": {"plugins/fulcrum-pa-core/skills/lead-capture/scripts/normalise_lead.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["--csv", "plugins/fulcrum-pa-core/skills/lead-capture/assets/sample-leads.csv"], "expect_exit": [0],
+     "expect_stdout": ["\"abn\": \"51 824 753 556\"", "\"abn_valid\": true", "\"phone\": \"+61390000000\"", "\"mobile\": \"+61400000001\"", "\"last_name\": \"McAllister\"", "postcode 2000 does not match state VIC"]},
+    {"kind": "empty", "args": ["tests/fixtures/lead-capture/empty.csv"], "expect_exit": [1], "expect_stderr": ["No leads"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/lead-capture/missing-field.csv"], "expect_exit": [1], "expect_stderr": ["No recognised lead fields"]},
+    {"kind": "edge", "args": ["tests/fixtures/lead-capture/messy.csv"], "expect_exit": [0],
+     "expect_stdout": ["\"mobile\": \"+61400000003\"", "ABN must have 11 digits (got 10)", "no recognised lead fields filled in"], "expect_stderr": ["row 4: more cells than header columns"]},
+    {"kind": "edge", "args": ["tests/fixtures/lead-capture/mixed.json"], "expect_exit": [0],
+     "expect_stdout": ["\"phone\": \"+61290000000\"", "\"last_name\": \"O'Brien\""], "expect_stderr": ["lead 2: not a JSON object"]},
+    {"kind": "edge", "args": ["tests/fixtures/lead-capture/broken.json"], "expect_exit": [1], "expect_stderr": ["as JSON: Expecting property name"]}
+  ]}}}

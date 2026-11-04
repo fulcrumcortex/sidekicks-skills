@@ -1,0 +1,5 @@
+time,party_size,name,duration,status
+7pm,2,Example A,,
+19:00,0,Sample B,,
+19:15,4,Demo C,abc,,extra
+25:00,2,Test D,,

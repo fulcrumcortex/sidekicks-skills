@@ -1,0 +1,5 @@
+worker_id,name,skills,max_hours_week,availability,compliance,home_area
+W1,Alex Example,personal_care,30,Mon 06:00-22:00,ndis_worker_screening=2029-02-28;first_aid=2027-06-30;cpr=2027-01-31,Northside
+W2,Sam Sample,personal_care,thirty,,ndis_worker_screening=2030-05-31,Riverbend
+W3,Jordan Test,personal_care,24,Monday 7am-3pm,ndis_worker_screening=2028-09-30,Riverbend
+W4,Riley Placeholder,personal_care,20,,first_aid=31/12/2027,Northside

@@ -1,0 +1,17 @@
+{"scripts": {"plugins/fulcrum-web-builder/skills/seo-structured-data-audit/scripts/seo_extract.py": {
+  "no_input": false,
+  "cases": [
+    {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+    {"kind": "sample", "args": ["tests/fixtures/seo-structured-data-audit/page.html", "--base", "https://www.example.com"], "expect_exit": [0],
+     "expect_stdout": ["title (53): Emergency Electrician in Geelong | Example Electrical", "links: 2 internal, 1 external", "images: 2 total, 1 without alt", "JSON-LD Electrician.telephone", "JSON-LD Electrician.address.postalCode"]},
+    {"kind": "sample", "args": ["tests/fixtures/seo-structured-data-audit/malformed-jsonld.html"], "expect_exit": [1],
+     "expect_stdout": ["HIGH   JSON-LD block does not parse"]},
+    {"kind": "empty", "args": ["tests/fixtures/seo-structured-data-audit/empty.html"], "expect_exit": [1],
+     "expect_stdout": ["HIGH   missing <title>"], "expect_stderr": ["is empty"]},
+    {"kind": "missing-field", "args": ["tests/fixtures/seo-structured-data-audit/no-head.html"], "expect_exit": [1],
+     "expect_stdout": ["HIGH   missing <title>", "missing meta description", "no rel=canonical"]},
+    {"kind": "edge", "args": ["tests/fixtures/seo-structured-data-audit/odd-type.html"], "expect_exit": [0],
+     "expect_stdout": ["@type must be a string or a list of strings", "JSON-LD Organization.logo"]},
+    {"kind": "edge", "args": ["tests/fixtures/seo-structured-data-audit/page.html", "--json"], "expect_exit": [0],
+     "expect_stdout": ["\"title_length\": 53", "\"links_internal\": 2", "\"links_external\": 1"]}
+  ]}}}

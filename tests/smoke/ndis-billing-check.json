@@ -1,0 +1,18 @@
+{"scripts": {"plugins/fulcrum-care-workforce/skills/ndis-billing-check/scripts/reconcile.py": {
+    "no_input": false,
+    "cases": [
+      {"kind": "help", "args": ["--help"], "expect_stdout": ["usage"]},
+      {"kind": "sample", "args": ["--sessions", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/sessions-sample.csv", "--claims", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/claims-sample.csv", "--budgets", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/budgets-sample.csv", "--as-of", "2026-11-05", "--out-claims", "{tmp}/claim-candidates.csv"],
+       "expect_exit": [0],
+       "expect_stdout": ["Claim candidates (unbilled, for review): 4, value 500.00; on hold: 2", "claimed 350.00 + unbilled 150.00 = 500.00 exceeds agreed 450.00", "3 clear business day(s) notice meets the notice period, but claim INV-2204 exists", "| DUPLICATE_CLAIM | P-BRAVO | INV-2202, INV-2203 |", "delivered 1.5 hour, claimed 1 | 50.00 |", "| MISSING_LINE_ITEM | P-ALPHA | S-1001/TH_TRAVEL | session S-1001 is billed, but not for TH_TRAVEL | 50.00 |"]},
+      {"kind": "empty", "args": ["--sessions", "tests/fixtures/ndis-billing-check/empty.csv", "--claims", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/claims-sample.csv", "--as-of", "2026-11-05"],
+       "expect_exit": [1], "expect_stderr": ["is empty"]},
+      {"kind": "missing-field", "args": ["--sessions", "tests/fixtures/ndis-billing-check/missing-field.csv", "--claims", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/claims-sample.csv", "--as-of", "2026-11-05"],
+       "expect_exit": [1], "expect_stderr": ["missing columns: support_item"]},
+      {"kind": "edge", "args": ["--sessions", "tests/fixtures/ndis-billing-check/header-only.csv", "--claims", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/claims-sample.csv", "--as-of", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["Session lines read: 0; claim lines read: 7", "| CLAIM_WITHOUT_SESSION | 6 |"]},
+      {"kind": "edge", "args": ["--sessions", "tests/fixtures/ndis-billing-check/bad-sessions.csv", "--claims", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/claims-sample.csv", "--as-of", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["| BAD_DATA | 3 |", "notice time 'yesterday' is not YYYY-MM-DD HH:MM"], "expect_stderr": ["sessions line 3: session_id blank", "date '08/10/2026' is not YYYY-MM-DD", "quantity 'two'"]},
+      {"kind": "edge", "args": ["--sessions", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/sessions-sample.csv", "--claims", "plugins/fulcrum-care-workforce/skills/ndis-billing-check/assets/claims-sample.csv", "--budgets", "tests/fixtures/ndis-billing-check/budgets-two-periods.csv", "--as-of", "2026-11-05"],
+       "expect_exit": [0], "expect_stdout": ["| OUTSIDE_AGREEMENT_PERIOD | 2 |"]}
+    ]}}}

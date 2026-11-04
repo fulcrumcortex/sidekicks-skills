@@ -1,0 +1,11 @@
+name,company,phone,state,consent,source
+Alex Example,Bluegum Dental (fictional),0400 000 001,NSW,,Web form
+Bea Sample,Orbit Freight (fictional),+61 (0)400 000 002,QLD,,Trade show
+Cal Demo,Kestrel & Co (fictional),400000003,,yes,Referral
+Dee Test,Wattle Cafe (fictional),(02) 9000 0004,,,Web form
+Eli Placeholder,Saltbush Print (fictional),0400 000 001,NSW,,Duplicate entry
+Fay Fiction,Mallee Joinery (fictional),0400 000 006,WA,,Web form
+Gus Mock,Harbour Lane (fictional),1300 000 007,VIC,,Directory
+Hal Dummy,Ironbark Plumbing (fictional),0400 000 008,SA,express,Customer
+Ivy Stub,Paperbark Studio (fictional),12345,TAS,,Web form
+Jo Overseas,Kiwi Imports (fictional),+64 21 000 0010,,,Email

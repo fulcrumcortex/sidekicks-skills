@@ -12,6 +12,7 @@ Names exactly what makes a site look generated or templated, and gives a short, 
 - A site or prototype "looks like every other AI startup", feels cheap, or the client cannot say why it does not feel premium.
 - After a fast AI-assisted build, before showing it to a client.
 - Not for: usability problems (`ux-critique`), WCAG conformance (`accessibility-audit`), copy rewriting in depth (`conversion-copy-review`), or token plumbing (`design-tokens`, which implements the palette and type decisions made here).
+- Hand-offs: implement the agreed fixes as a reviewable change with `fulcrum-code-change`, and verify an authorised release with `fulcrum-release-check`.
 
 ## What you need
 

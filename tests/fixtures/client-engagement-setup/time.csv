@@ -1,0 +1,10 @@
+date,engagement,person,hours,rate,billed,billable,task
+2026-09-01,ENG-101,Alex Chen,20,200,Y,Y,Fieldwork
+2026-08-15,ENG-101,Sam Lee,12,200,N,Y,Planning
+2026-10-20,ENG-101,Alex Chen,10,200,N,Y,Drafting
+2026-09-20,ENG-102,Sam Lee,8,180,N,Y,Review
+2026-11-04,ENG-102,Sam Lee,5,180,N,Y,Review
+2026-11-05,ENG-102,Sam Lee,2,180,N,N,Internal admin
+2026-11-02,ENG-103,Priya Nair,12,150,N,Y,Advice
+2026-11-05,ENG-103,Priya Nair,7,150,N,Y,Advice
+2026-11-03,ENG-999,Jo Park,1,,N,Y,Call
