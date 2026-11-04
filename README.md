@@ -191,7 +191,17 @@ Show me who to chase this week and draft the reminders. Do not send anything.
 | Fulcrum CAD | [fulcrumcad.app](https://fulcrumcad.app/) | Editable architectural design in the browser |
 | Kyphra | [kyphra.app](https://kyphra.app/) | Private messaging |
 
-Product guides for all of these are in the [documentation](https://fulcrumcortex.github.io/documentation/). Fulcrum CRM industry modules vary by account; check [fulcrumcrm.app](https://fulcrumcrm.app/) for what is currently available. Find Fulcrum Cortex elsewhere through the [profile directory](https://fulcrumcortex.github.io/profiles/) and the [Cortex blog](https://fulcrumcortex.com/blog).
+Product guides for all of these are in the [documentation](https://fulcrumcortex.github.io/documentation/). Fulcrum CRM industry modules vary by account; check [fulcrumcrm.app](https://fulcrumcrm.app/) for what is currently available.
+
+## Find Fulcrum Cortex
+
+These are public profile destinations supplied for the brand. Publishing/member profiles can use personal handles; they are not all separate product websites. Some platforms restrict signed-out access or indexing. A listing or backlink is not a guarantee of search visibility.
+
+[Gravatar](https://gravatar.com/ninjatranquil3a6a7d8b8f) · [solo.to](https://solo.to/fulcrumcortex) · [Linktree](https://linktr.ee/fulcrumcortex) · [Medium](https://medium.com/@dom_36426/about) · [F6S](https://www.f6s.com/member/dom-rutili) · [Substack](https://substack.com/@fulcrumcortex) · [Hashnode](https://hashnode.com/@fulcrumcortex) · [X](https://x.com/fulcrumcortex) · [Wakelet](https://wakelet.com/@fulcrumcortex) · [LinkedIn](https://www.linkedin.com/company/fulcrum-cortex/about/) · [Instagram](https://www.instagram.com/fulcrumcortex/)
+
+[Profile directory](https://fulcrumcortex.github.io/profiles/) · [Latest Cortex articles](https://fulcrumcortex.com/blog)
+
+Feedspot and Tumblr are omitted until a public profile is confirmed. This repository contains no account login URLs, passwords, private customer records or recovery information.
 
 ## Repository layout
 

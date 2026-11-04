@@ -12,7 +12,8 @@ Checks:
   * relative links in Markdown files point to files that exist
   * no file contains the retired internal product name or stray hook front matter
   * every http(s) link in a Markdown file returns HTTP 200 without a redirect
-    (skipped with --offline)
+    (skipped with --offline); only the social hosts in BOT_BLOCKING_HOSTS,
+    which refuse automated requests, are exempt
   * smoke tests: every helper script under plugins/**/scripts/*.py has cases in
     tests/smoke/*.json (help, a realistic sample, and empty and missing-field
     input unless the script reads no input), and every case runs without a
@@ -42,6 +43,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -53,6 +55,11 @@ MD_LINK_RE = re.compile(r"\]\(([^)\s]+)\)")
 BANNED = [re.compile("quo" + "rum", re.I), re.compile(r"generated_by:\s*skills-for-architects")]
 TEXT_SUFFIXES = {".md", ".json", ".py", ".csv", ".ts", ".tsx", ".css", ".yaml", ".yml", ".txt"}
 SKIP_DIRS = {".git", "__pycache__", "node_modules"}
+# Social profile hosts that refuse automated requests (403, 405, 999 or a 302 to a
+# login page) even though the public profile opens normally in a browser. Links to
+# these exact hosts are exempt from the 200 rule; every other host must return 200
+# without a redirect. Add a host here only after confirming the page in a browser.
+BOT_BLOCKING_HOSTS = {"medium.com", "www.f6s.com", "www.linkedin.com", "x.com"}
 # Hosts used only as example values inside code samples, never as links.
 EXAMPLE_HOSTS = ("example.com", "example.org", "example.net", "localhost", "127.0.0.1")
 
@@ -227,6 +234,9 @@ def fetch_status(url: str) -> int:
 
 
 def check_links(rep: Report, urls: set[str]) -> None:
+    exempt = {u for u in urls if urllib.parse.urlsplit(u).hostname in BOT_BLOCKING_HOSTS}
+    rep.count("bot-blocking profile links exempted", len(exempt))
+    urls = urls - exempt
     with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
         for url, status in zip(sorted(urls), pool.map(fetch_status, sorted(urls))):
             rep.count("links checked")
