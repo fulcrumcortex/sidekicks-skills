@@ -1,0 +1,462 @@
+{
+  "version": "0.1.0",
+  "plugin": "fulcrum-sidekicks",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "roles": [
+    {
+      "slug": "coordinator",
+      "title": "Coordination Sidekick",
+      "headline": "Keep the outcome moving.",
+      "description": "Coordinate a business request across people and tools with clear owners, dependencies and evidence.",
+      "guide": "https://fulcrumcortex.github.io/documentation/sessions/",
+      "screenshot": "docs-home.png",
+      "caption": "A real document interface can hold the shared brief. This local screenshot uses fictional demonstration data.",
+      "capabilities": [
+        "Clarify the requested outcome and completion evidence.",
+        "Track dependent tasks and reconcile the result.",
+        "Report completed work and the exact next action."
+      ],
+      "skills": [
+        "fulcrum-coordinate-work"
+      ]
+    },
+    {
+      "slug": "developer",
+      "title": "Developer Sidekick",
+      "headline": "From a requirement to a reviewable change.",
+      "description": "Investigate code, make a bounded change, run the relevant checks and verify an authorised release.",
+      "guide": "https://fulcrumcortex.github.io/documentation/code/",
+      "screenshot": "code-plan.svg",
+      "caption": "Actual Fulcrum Code terminal renderer with a stub agent and fictional task; no source changes or model requests occurred.",
+      "capabilities": [
+        "Find the cause of a reproducible bug.",
+        "Implement a small change with focused checks.",
+        "Track a release from source revision to live behaviour."
+      ],
+      "skills": [
+        "fulcrum-code-change",
+        "fulcrum-release-check"
+      ]
+    },
+    {
+      "slug": "sales",
+      "title": "Sales Sidekick",
+      "headline": "Give the relationship a next step.",
+      "description": "Prepare grounded follow-ups and keep contact data useful without inventing commitments or merging uncertain matches.",
+      "guide": "https://fulcrumcortex.github.io/documentation/crm/",
+      "screenshot": null,
+      "caption": "",
+      "capabilities": [
+        "Read the latest contact activity before drafting.",
+        "Propose a clear follow-up and owner.",
+        "Review duplicate candidates before a cleanup."
+      ],
+      "skills": [
+        "fulcrum-crm-follow-up",
+        "fulcrum-crm-data-cleanup"
+      ]
+    },
+    {
+      "slug": "voice",
+      "title": "Voice Sidekick",
+      "headline": "Make the conversation useful.",
+      "description": "Prepare focused Lyre agents, review what callers asked and check whether promised actions actually happened.",
+      "guide": "https://fulcrumcortex.github.io/documentation/lyre/",
+      "screenshot": null,
+      "caption": "",
+      "capabilities": [
+        "Shape an agent\u2019s opening, knowledge and fallback.",
+        "Test a controlled enquiry workflow.",
+        "Review transcripts and check the destination record."
+      ],
+      "skills": [
+        "fulcrum-voice-agent-setup",
+        "fulcrum-call-review"
+      ]
+    },
+    {
+      "slug": "workspace",
+      "title": "Workspace Sidekick",
+      "headline": "Bring order to everyday work.",
+      "description": "Triage email, prepare booking pages, extract meeting actions, review documents and manage requested file access.",
+      "guide": "https://fulcrumcortex.github.io/documentation/fulcrum-mail/",
+      "screenshot": "mail-inbox.png",
+      "caption": "Actual local Fulcrum Mail interface with a fictional inbox. The demonstration does not show a live automated send.",
+      "capabilities": [
+        "Turn an inbox slice into a prioritised action queue.",
+        "Prepare a booking page and check availability.",
+        "Convert meeting notes into owned actions.",
+        "Review a document and the intended file access.",
+        "Explain a Wallet balance without buying credit."
+      ],
+      "skills": [
+        "fulcrum-inbox-triage",
+        "fulcrum-booking-setup",
+        "fulcrum-meeting-actions",
+        "fulcrum-document-review",
+        "fulcrum-file-sharing",
+        "fulcrum-wallet-check"
+      ]
+    },
+    {
+      "slug": "marketing",
+      "title": "Marketing Sidekick",
+      "headline": "Start with a useful story.",
+      "description": "Turn verified product facts into a campaign brief, practical article and channel-specific copy.",
+      "guide": "https://fulcrumcortex.github.io/documentation/sessions/",
+      "screenshot": "docs-home.png",
+      "caption": "Actual local Docs interface with template previews and a fictional account; campaign content is a task example.",
+      "capabilities": [
+        "Write a brief around a real customer problem.",
+        "Prepare product-grounded article and social copy.",
+        "Track authorised publication by its actual public URL."
+      ],
+      "skills": [
+        "fulcrum-campaign-brief"
+      ]
+    },
+    {
+      "slug": "delivery",
+      "title": "Delivery Sidekick",
+      "headline": "Make done observable.",
+      "description": "Turn a delivery brief into a practical plan with dependencies, acceptance criteria and a visible handoff.",
+      "guide": "https://fulcrumcortex.github.io/documentation/crm/projects-and-issues/",
+      "screenshot": "docs-home.png",
+      "caption": "Actual local Docs interface. Plans and acceptance criteria can be prepared here; no project issues were created by the screenshot.",
+      "capabilities": [
+        "Break an outcome into reviewable work.",
+        "Define acceptance evidence and dependencies.",
+        "Keep missing owners and dates explicit."
+      ],
+      "skills": [
+        "fulcrum-project-planning"
+      ]
+    },
+    {
+      "slug": "design",
+      "title": "Design Sidekick",
+      "headline": "Give the model a clear brief.",
+      "description": "Prepare a constrained spatial brief and, when connected, review a concept in the editable CAD model.",
+      "guide": "https://fulcrumcad.app/",
+      "screenshot": null,
+      "caption": "",
+      "capabilities": [
+        "Separate supplied dimensions from assumptions.",
+        "Plan editable building elements and circulation.",
+        "Review plan, 3D and section consistency."
+      ],
+      "skills": [
+        "fulcrum-cad-design-brief"
+      ]
+    },
+    {
+      "slug": "private-comms",
+      "title": "Private communications Sidekick",
+      "headline": "Say only what needs saying.",
+      "description": "Draft a private update from supplied context without assuming access to encrypted conversations or keys.",
+      "guide": "https://kyphra.app/",
+      "screenshot": null,
+      "caption": "",
+      "capabilities": [
+        "Turn supplied notes into a concise message.",
+        "Keep unnecessary personal detail out of the draft.",
+        "Leave sending and privacy settings under the user\u2019s control."
+      ],
+      "skills": [
+        "fulcrum-private-message-draft"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "fulcrum-coordinate-work",
+      "title": "Coordinate a business outcome",
+      "description": "Turn a cross-product business request into bounded work, track dependencies and verify outcomes across the connected Fulcrum tools. Use for tasks that span products or teams.",
+      "role": "coordinator",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-coordinate-work/SKILL.md",
+      "prompt": "Direct an enquiry from the inbox to a reviewed CRM follow-up without sending anything yet.",
+      "outcome": "A short task plan, linked results and clearly separated completed and pending stages."
+    },
+    {
+      "name": "fulcrum-code-change",
+      "title": "Make a reviewable code change",
+      "description": "Investigate and implement a bounded software change in Fulcrum Code, preserving project conventions and validating the requested behaviour. Use for coding tasks in an existing project.",
+      "role": "developer",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-code-change/SKILL.md",
+      "prompt": "Fix the empty-name validation bug, keep the current design and show the passing focused checks.",
+      "outcome": "A reviewable diff with behavioural validation and an accurate release status."
+    },
+    {
+      "name": "fulcrum-release-check",
+      "title": "Verify a release from source to live",
+      "description": "Track and verify an authorised software release through source, checks, publication, deployment and live behaviour. Use when release completion or a disputed deployment status needs evidence.",
+      "role": "developer",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-release-check/SKILL.md",
+      "prompt": "Check whether the authorised release actually reached production and finish any recoverable prerequisite.",
+      "outcome": "A release record tied to the expected revision and live behaviour."
+    },
+    {
+      "name": "fulcrum-crm-follow-up",
+      "title": "Prepare a customer follow-up",
+      "description": "Prepare or carry out an authorised CRM follow-up using the contact record, recent activity and an explicit next step. Use for customer follow-up work, not bulk outreach.",
+      "role": "sales",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-crm-follow-up/SKILL.md",
+      "prompt": "Read the latest enquiry and prepare a reply with the agreed next step; leave it as a draft.",
+      "outcome": "A source-grounded draft or verified authorised send, with its CRM next action."
+    },
+    {
+      "name": "fulcrum-crm-data-cleanup",
+      "title": "Review CRM data quality",
+      "description": "Find likely CRM duplicates and inconsistent fields, propose a reversible cleanup and verify authorised changes. Use before an import or when records need reconciliation.",
+      "role": "sales",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-crm-data-cleanup/SKILL.md",
+      "prompt": "Check this sample import for duplicates and give me a cleanup proposal before changing CRM records.",
+      "outcome": "A match review and field-mapping plan, with reconciled results if changes were authorised."
+    },
+    {
+      "name": "fulcrum-voice-agent-setup",
+      "title": "Configure a focused voice agent",
+      "description": "Prepare and test a Lyre voice agent for a defined inbound or outbound workflow. Use for agent instructions, knowledge, tools and a controlled pilot, not unrestricted calling campaigns.",
+      "role": "voice",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-voice-agent-setup/SKILL.md",
+      "prompt": "Prepare an inbound enquiries agent and test its unknown-answer and callback behaviour in the browser.",
+      "outcome": "A bounded agent configuration, test observations and verified follow-through."
+    },
+    {
+      "name": "fulcrum-call-review",
+      "title": "Review a call and its follow-through",
+      "description": "Review Lyre call evidence, separate observed outcomes from promises, and prepare the appropriate CRM or callback follow-up. Use for call quality and outcome reviews.",
+      "role": "voice",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-call-review/SKILL.md",
+      "prompt": "Review this call and tell me whether the promised meeting and follow-up actually happened.",
+      "outcome": "An evidence-based call outcome with destination checks and a next action."
+    },
+    {
+      "name": "fulcrum-inbox-triage",
+      "title": "Triage an inbox with context",
+      "description": "Organise a requested slice of Fulcrum Mail, identify urgent work and prepare grounded replies. Use for inbox review without assuming permission to delete or send.",
+      "role": "workspace",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-inbox-triage/SKILL.md",
+      "prompt": "Review this morning\u2019s enquiries, identify the ones needing action and draft replies without sending.",
+      "outcome": "A prioritised queue with thread references and clearly labelled drafts."
+    },
+    {
+      "name": "fulcrum-booking-setup",
+      "title": "Set up and check a booking page",
+      "description": "Configure or review a Fulcrum Calendar booking page and verify availability, time zones and guest confirmation. Use for scheduling-page setup and booking troubleshooting.",
+      "role": "workspace",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-booking-setup/SKILL.md",
+      "prompt": "Prepare a 30-minute introduction page with buffers and check a known busy time before publishing.",
+      "outcome": "A verified availability configuration and the draft or published page link."
+    },
+    {
+      "name": "fulcrum-meeting-actions",
+      "title": "Turn a meeting into accountable actions",
+      "description": "Extract decisions and action items from supplied meeting notes or an authorised transcript. Use for follow-through without inventing agreements or creating recordings.",
+      "role": "workspace",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-meeting-actions/SKILL.md",
+      "prompt": "Extract decisions and owner/date action items from these notes, marking anything not agreed.",
+      "outcome": "A grounded decision summary and an actionable, non-invented follow-up list."
+    },
+    {
+      "name": "fulcrum-document-review",
+      "title": "Review a business document",
+      "description": "Review a supplied or connected Fulcrum document for purpose, consistency, factual support and actionable revisions. Use for editorial review, not professional certification.",
+      "role": "workspace",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-document-review/SKILL.md",
+      "prompt": "Review this proposal for inconsistent claims and unclear next steps, then suggest focused revisions.",
+      "outcome": "A clear review with supported revisions and unresolved assumptions."
+    },
+    {
+      "name": "fulcrum-file-sharing",
+      "title": "Share a file with the intended audience",
+      "description": "Prepare or manage Fulcrum Drive sharing with the intended file, recipient, role and expiry. Use for a requested share or access problem, not workspace-wide permission changes.",
+      "role": "workspace",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-file-sharing/SKILL.md",
+      "prompt": "Prepare a seven-day view/download link for this file and show me the access settings before sending it.",
+      "outcome": "The correct file link with verified audience, access and expiry."
+    },
+    {
+      "name": "fulcrum-wallet-check",
+      "title": "Reconcile a Wallet balance question",
+      "description": "Explain Fulcrum Wallet balance, holds, credit lots and history for the selected account. Use for read-only billing investigation, not purchases or plan changes.",
+      "role": "workspace",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-wallet-check/SKILL.md",
+      "prompt": "Explain why this Wallet balance changed and distinguish the held amount from settled usage.",
+      "outcome": "A read-only reconciliation with transaction evidence and unresolved differences."
+    },
+    {
+      "name": "fulcrum-campaign-brief",
+      "title": "Prepare a grounded campaign brief",
+      "description": "Create a practical marketing or outreach brief with audience, claims, channels, assets and measurement. Use for campaign planning and article preparation; publication requires its own authorised scope.",
+      "role": "marketing",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-campaign-brief/SKILL.md",
+      "prompt": "Prepare an article showing how a Sidekick turns a customer enquiry into a reviewed next action.",
+      "outcome": "A fact-checked campaign brief, channel drafts and publication evidence if authorised."
+    },
+    {
+      "name": "fulcrum-project-planning",
+      "title": "Plan work with acceptance evidence",
+      "description": "Turn a requested delivery outcome into issues, dependencies and acceptance criteria in the available project workspace. Use for a bounded project or sprint plan.",
+      "role": "delivery",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-project-planning/SKILL.md",
+      "prompt": "Turn this launch brief into a small delivery plan with dependencies and checkable acceptance criteria.",
+      "outcome": "A practical issue plan with explicit evidence and undecided owners or dates."
+    },
+    {
+      "name": "fulcrum-cad-design-brief",
+      "title": "Prepare an editable CAD design brief",
+      "description": "Translate a spatial design request into a constrained Fulcrum CAD brief and reviewable modelling steps. Use for concept design, not engineering sign-off or construction certification.",
+      "role": "design",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-cad-design-brief/SKILL.md",
+      "prompt": "Prepare a compact one-bedroom cabin concept brief with dimensions and unresolved site assumptions.",
+      "outcome": "A constrained modelling brief or verified editable concept, with assumptions kept visible."
+    },
+    {
+      "name": "fulcrum-private-message-draft",
+      "title": "Draft a private message",
+      "description": "Prepare a concise private message from user-supplied context, including for Kyphra. Use for drafting without accessing private conversations or handling encryption keys.",
+      "role": "private-comms",
+      "path": "plugins/fulcrum-sidekicks/skills/fulcrum-private-message-draft/SKILL.md",
+      "prompt": "Draft a discreet two-sentence update from these notes; do not send or access any chats.",
+      "outcome": "A concise private draft with no assumed messaging integration."
+    }
+  ],
+  "suite": [
+    {
+      "name": "Fulcrum Cortex",
+      "url": "https://fulcrumcortex.com/",
+      "description": "AI execution layer for business",
+      "kind": "Product website"
+    },
+    {
+      "name": "Fulcrum Sessions",
+      "url": "https://fulcrumcortex.com/sessions",
+      "description": "Humans + AI as one team; the orchestrator",
+      "kind": "Product website"
+    },
+    {
+      "name": "Fulcrum Code",
+      "url": "https://fulcrumcode.app/",
+      "description": "Terminal coding agent",
+      "kind": "Product website"
+    },
+    {
+      "name": "Fulcrum CRM",
+      "url": "https://fulcrumcrm.app/",
+      "description": "Contacts, companies, deals and business workflows",
+      "kind": "Product website"
+    },
+    {
+      "name": "Lyre",
+      "url": "https://lyre.au/",
+      "description": "Voice agents, calling and SMS",
+      "kind": "Product website"
+    },
+    {
+      "name": "Fulcrum Mail",
+      "url": "https://fulcrumail.app/",
+      "description": "Email and the workspace suite",
+      "kind": "Product website"
+    },
+    {
+      "name": "Fulcrum CAD",
+      "url": "https://fulcrumcad.app/",
+      "description": "Editable architectural design in the browser",
+      "kind": "Product website"
+    },
+    {
+      "name": "Kyphra",
+      "url": "https://kyphra.app/",
+      "description": "Private messaging",
+      "kind": "Product website"
+    },
+    {
+      "name": "Fulcrum Docs",
+      "url": "https://docs.fulcrumail.app/",
+      "description": "Document editing and collaboration",
+      "kind": "Product website"
+    },
+    {
+      "name": "Calendar and booking pages",
+      "url": "https://fulcrumail.app/calendar",
+      "description": "Workspace calendar and guest booking links",
+      "kind": "Workspace surface"
+    },
+    {
+      "name": "Meetings",
+      "url": "https://fulcrumail.app/meetings",
+      "description": "Workspace video meetings",
+      "kind": "Workspace surface"
+    },
+    {
+      "name": "Drive",
+      "url": "https://fulcrumail.app/drive",
+      "description": "Workspace files, folders and sharing",
+      "kind": "Workspace surface"
+    },
+    {
+      "name": "Wallet",
+      "url": "https://fulcrumail.app/wallet",
+      "description": "Account credit, plans and billing",
+      "kind": "Workspace surface"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "Gravatar",
+      "url": "https://gravatar.com/ninjatranquil3a6a7d8b8f",
+      "kind": "Profile directory"
+    },
+    {
+      "name": "solo.to",
+      "url": "https://solo.to/fulcrumcortex",
+      "kind": "Brand links"
+    },
+    {
+      "name": "Linktree",
+      "url": "https://linktr.ee/fulcrumcortex",
+      "kind": "Brand links"
+    },
+    {
+      "name": "Medium",
+      "url": "https://medium.com/@dom_36426/about",
+      "kind": "Publishing profile"
+    },
+    {
+      "name": "F6S",
+      "url": "https://www.f6s.com/member/dom-rutili",
+      "kind": "Member profile"
+    },
+    {
+      "name": "Substack",
+      "url": "https://substack.com/@fulcrumcortex",
+      "kind": "Publishing profile"
+    },
+    {
+      "name": "Hashnode",
+      "url": "https://hashnode.com/@fulcrumcortex",
+      "kind": "Publishing profile"
+    },
+    {
+      "name": "X",
+      "url": "https://x.com/fulcrumcortex",
+      "kind": "Social profile"
+    },
+    {
+      "name": "Wakelet",
+      "url": "https://wakelet.com/@fulcrumcortex",
+      "kind": "Collections"
+    },
+    {
+      "name": "LinkedIn",
+      "url": "https://www.linkedin.com/company/fulcrum-cortex/about/",
+      "kind": "Company profile"
+    },
+    {
+      "name": "Instagram",
+      "url": "https://www.instagram.com/fulcrumcortex/",
+      "kind": "Social profile"
+    }
+  ]
+}

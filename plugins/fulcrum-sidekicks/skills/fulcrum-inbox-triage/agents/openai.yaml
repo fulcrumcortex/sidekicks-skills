@@ -1,0 +1,4 @@
+interface:
+  display_name: "Triage an inbox with context"
+  short_description: "Triage an inbox with context with clear outcomes"
+  default_prompt: "Use $fulcrum-inbox-triage to review this morning’s enquiries, identify the ones needing action and draft replies without sending."

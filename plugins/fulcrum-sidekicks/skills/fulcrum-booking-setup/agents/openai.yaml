@@ -1,0 +1,4 @@
+interface:
+  display_name: "Set up and check a booking page"
+  short_description: "Set up and check a booking page with clear outcomes"
+  default_prompt: "Use $fulcrum-booking-setup to prepare a 30-minute introduction page with buffers and check a known busy time before publishing."

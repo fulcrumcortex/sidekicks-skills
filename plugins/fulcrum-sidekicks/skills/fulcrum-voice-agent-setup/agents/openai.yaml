@@ -1,0 +1,4 @@
+interface:
+  display_name: "Configure a focused voice agent"
+  short_description: "Configure a focused voice agent with clear outcomes"
+  default_prompt: "Use $fulcrum-voice-agent-setup to prepare an inbound enquiries agent and test its unknown-answer and callback behaviour in the browser."

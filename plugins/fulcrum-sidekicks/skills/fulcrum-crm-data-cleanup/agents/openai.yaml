@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review CRM data quality"
+  short_description: "Review CRM data quality with clear outcomes"
+  default_prompt: "Use $fulcrum-crm-data-cleanup to check this sample import for duplicates and give me a cleanup proposal before changing CRM records."

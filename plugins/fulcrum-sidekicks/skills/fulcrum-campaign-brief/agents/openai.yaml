@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare a grounded campaign brief"
+  short_description: "Prepare a grounded campaign brief with clear outcomes"
+  default_prompt: "Use $fulcrum-campaign-brief to prepare an article showing how a Sidekick turns a customer enquiry into a reviewed next action."

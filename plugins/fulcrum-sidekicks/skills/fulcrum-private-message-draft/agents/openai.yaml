@@ -1,0 +1,4 @@
+interface:
+  display_name: "Draft a private message"
+  short_description: "Draft a private message with clear outcomes"
+  default_prompt: "Use $fulcrum-private-message-draft to draft a discreet two-sentence update from these notes; do not send or access any chats."

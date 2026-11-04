@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review a business document"
+  short_description: "Review a business document with clear outcomes"
+  default_prompt: "Use $fulcrum-document-review to review this proposal for inconsistent claims and unclear next steps, then suggest focused revisions."

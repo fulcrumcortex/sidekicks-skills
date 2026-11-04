@@ -1,0 +1,12 @@
+{
+  "name": "fulcrum-sidekicks",
+  "version": "0.1.0",
+  "description": "Reusable Fulcrum business and engineering workflows.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://fulcrumcortex.github.io/sidekicks/",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "skills": "./skills/"
+}

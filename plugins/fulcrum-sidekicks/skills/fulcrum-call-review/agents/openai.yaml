@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review a call and its follow-through"
+  short_description: "Review a call and its follow-through with clear outcomes"
+  default_prompt: "Use $fulcrum-call-review to review this call and tell me whether the promised meeting and follow-up actually happened."

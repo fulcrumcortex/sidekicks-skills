@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan work with acceptance evidence"
+  short_description: "Plan work with acceptance evidence with clear outcomes"
+  default_prompt: "Use $fulcrum-project-planning to turn this launch brief into a small delivery plan with dependencies and checkable acceptance criteria."

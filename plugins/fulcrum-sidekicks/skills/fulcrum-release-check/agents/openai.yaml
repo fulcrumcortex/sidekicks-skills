@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify a release from source to live"
+  short_description: "Verify a release from source to live with clear outcomes"
+  default_prompt: "Use $fulcrum-release-check to check whether the authorised release actually reached production and finish any recoverable prerequisite."

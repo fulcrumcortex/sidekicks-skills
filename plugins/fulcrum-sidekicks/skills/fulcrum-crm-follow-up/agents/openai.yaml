@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare a customer follow-up"
+  short_description: "Prepare a customer follow-up with clear outcomes"
+  default_prompt: "Use $fulcrum-crm-follow-up to read the latest enquiry and prepare a reply with the agreed next step; leave it as a draft."

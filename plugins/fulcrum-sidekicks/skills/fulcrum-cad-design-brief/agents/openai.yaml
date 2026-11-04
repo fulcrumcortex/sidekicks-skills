@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare an editable CAD design brief"
+  short_description: "Prepare an editable CAD design brief with clear outcomes"
+  default_prompt: "Use $fulcrum-cad-design-brief to prepare a compact one-bedroom cabin concept brief with dimensions and unresolved site assumptions."

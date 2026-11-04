@@ -1,0 +1,4 @@
+interface:
+  display_name: "Turn a meeting into accountable actions"
+  short_description: "Turn a meeting into accountable actions with clear outcomes"
+  default_prompt: "Use $fulcrum-meeting-actions to extract decisions and owner/date action items from these notes, marking anything not agreed."

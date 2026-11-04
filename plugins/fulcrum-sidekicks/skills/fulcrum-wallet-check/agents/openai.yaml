@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reconcile a Wallet balance question"
+  short_description: "Reconcile a Wallet balance question with clear outcomes"
+  default_prompt: "Use $fulcrum-wallet-check to explain why this Wallet balance changed and distinguish the held amount from settled usage."

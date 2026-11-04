@@ -1,0 +1,24 @@
+{
+  "name": "fulcrum-sidekicks",
+  "owner": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "plugins": [
+    {
+      "name": "fulcrum-sidekicks",
+      "source": "./plugins/fulcrum-sidekicks",
+      "description": "Practical workflow skills for the Fulcrum suite.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekicks",
+        "crm",
+        "voice",
+        "workspace",
+        "code"
+      ]
+    }
+  ]
+}

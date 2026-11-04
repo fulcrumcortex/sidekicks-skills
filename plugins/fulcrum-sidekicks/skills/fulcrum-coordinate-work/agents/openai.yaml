@@ -1,0 +1,4 @@
+interface:
+  display_name: "Coordinate a business outcome"
+  short_description: "Coordinate a business outcome with clear outcomes"
+  default_prompt: "Use $fulcrum-coordinate-work to direct an enquiry from the inbox to a reviewed CRM follow-up without sending anything yet."

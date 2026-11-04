@@ -1,0 +1,4 @@
+interface:
+  display_name: "Share a file with the intended audience"
+  short_description: "Share a file with the intended audience with clear outcomes"
+  default_prompt: "Use $fulcrum-file-sharing to prepare a seven-day view/download link for this file and show me the access settings before sending it."

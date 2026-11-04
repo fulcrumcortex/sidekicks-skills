@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make a reviewable code change"
+  short_description: "Make a reviewable code change with clear outcomes"
+  default_prompt: "Use $fulcrum-code-change to fix the empty-name validation bug, keep the current design and show the passing focused checks."
