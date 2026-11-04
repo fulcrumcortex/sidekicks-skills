@@ -199,3 +199,11 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for the folder layout, the SKILL.md temp
 ## Licence
 
 [MIT](LICENSE). The skills are instructions, not professional advice. Check the outputs before you rely on them.
+
+## Practical articles
+
+- [What a Sidekick skill actually gives your AI teammate — Hashnode](https://fulcrumcortex.hashnode.dev/what-a-sidekick-skill-actually-gives-your-ai-teammate)
+- [Turn a customer enquiry into an accountable next action — LinkedIn](https://www.linkedin.com/pulse/turn-customer-enquiry-accountable-next-action-fulcrum-cortex-mvhye/)
+- [A practical first week with Cortex Chat](https://fulcrumcortex.github.io/articles/first-week-cortex-chat/)
+
+Some platforms limit signed-out viewing; publication does not guarantee indexing.
