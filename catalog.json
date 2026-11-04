@@ -10,7 +10,7 @@
       "description": "Coordinate a business request across people and tools with clear owners, dependencies and evidence.",
       "guide": "https://fulcrumcortex.github.io/documentation/sessions/",
       "screenshot": "docs-home.png",
-      "caption": "A real document interface can hold the shared brief. This local screenshot uses fictional demonstration data.",
+      "caption": "Keep the shared brief and next actions in Docs.",
       "capabilities": [
         "Clarify the requested outcome and completion evidence.",
         "Track dependent tasks and reconcile the result.",
@@ -27,7 +27,7 @@
       "description": "Investigate code, make a bounded change, run the relevant checks and verify an authorised release.",
       "guide": "https://fulcrumcortex.github.io/documentation/code/",
       "screenshot": "code-plan.svg",
-      "caption": "Actual Fulcrum Code terminal renderer with a stub agent and fictional task; no source changes or model requests occurred.",
+      "caption": "Use Fulcrum Code Plan mode to investigate a change before editing.",
       "capabilities": [
         "Find the cause of a reproducible bug.",
         "Implement a small change with focused checks.",
@@ -65,7 +65,7 @@
       "screenshot": null,
       "caption": "",
       "capabilities": [
-        "Shape an agent\u2019s opening, knowledge and fallback.",
+        "Shape an agent’s opening, knowledge and fallback.",
         "Test a controlled enquiry workflow.",
         "Review transcripts and check the destination record."
       ],
@@ -81,7 +81,7 @@
       "description": "Triage email, prepare booking pages, extract meeting actions, review documents and manage requested file access.",
       "guide": "https://fulcrumcortex.github.io/documentation/fulcrum-mail/",
       "screenshot": "mail-inbox.png",
-      "caption": "Actual local Fulcrum Mail interface with a fictional inbox. The demonstration does not show a live automated send.",
+      "caption": "Use the inbox to read, organise and reply to messages.",
       "capabilities": [
         "Turn an inbox slice into a prioritised action queue.",
         "Prepare a booking page and check availability.",
@@ -105,7 +105,7 @@
       "description": "Turn verified product facts into a campaign brief, practical article and channel-specific copy.",
       "guide": "https://fulcrumcortex.github.io/documentation/sessions/",
       "screenshot": "docs-home.png",
-      "caption": "Actual local Docs interface with template previews and a fictional account; campaign content is a task example.",
+      "caption": "Prepare campaign briefs and content in Docs.",
       "capabilities": [
         "Write a brief around a real customer problem.",
         "Prepare product-grounded article and social copy.",
@@ -122,7 +122,7 @@
       "description": "Turn a delivery brief into a practical plan with dependencies, acceptance criteria and a visible handoff.",
       "guide": "https://fulcrumcortex.github.io/documentation/crm/projects-and-issues/",
       "screenshot": "docs-home.png",
-      "caption": "Actual local Docs interface. Plans and acceptance criteria can be prepared here; no project issues were created by the screenshot.",
+      "caption": "Write plans and acceptance criteria in Docs.",
       "capabilities": [
         "Break an outcome into reviewable work.",
         "Define acceptance evidence and dependencies.",
@@ -160,7 +160,7 @@
       "capabilities": [
         "Turn supplied notes into a concise message.",
         "Keep unnecessary personal detail out of the draft.",
-        "Leave sending and privacy settings under the user\u2019s control."
+        "Leave sending and privacy settings under the user’s control."
       ],
       "skills": [
         "fulcrum-private-message-draft"
@@ -237,7 +237,7 @@
       "description": "Organise a requested slice of Fulcrum Mail, identify urgent work and prepare grounded replies. Use for inbox review without assuming permission to delete or send.",
       "role": "workspace",
       "path": "plugins/fulcrum-sidekicks/skills/fulcrum-inbox-triage/SKILL.md",
-      "prompt": "Review this morning\u2019s enquiries, identify the ones needing action and draft replies without sending.",
+      "prompt": "Review this morning’s enquiries, identify the ones needing action and draft replies without sending.",
       "outcome": "A prioritised queue with thread references and clearly labelled drafts."
     },
     {
