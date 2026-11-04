@@ -1,0 +1,8 @@
+claim_ref,participant_ref,date,support_item,quantity,unit_price,session_id,status,claim_type
+INV-2201,P-ALPHA,2026-10-06,TH_SESSION,1,100.00,S-1001,paid,standard
+INV-2202,P-BRAVO,2026-10-08,TH_SESSION,1,100.00,S-1003,submitted,standard
+INV-2203,P-BRAVO,2026-10-08,TH_SESSION,1,100.00,S-1003,draft,standard
+INV-2204,P-BRAVO,2026-10-22,TH_SESSION,1.5,100.00,S-1005,draft,cancellation
+INV-2205,P-CHARLIE,2026-10-09,TH_SESSION,1,110.00,S-1006,submitted,standard
+INV-2206,P-CHARLIE,2026-10-23,TH_SESSION,1,100.00,,submitted,standard
+INV-2207,P-ALPHA,2026-09-29,TH_SESSION,1,100.00,,rejected,standard

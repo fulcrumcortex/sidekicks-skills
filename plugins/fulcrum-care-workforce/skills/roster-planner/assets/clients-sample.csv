@@ -1,0 +1,5 @@
+client_ref,preferred_workers,excluded_workers,max_workers_week
+C-ALPHA,W1,,2
+C-BRAVO,,W4,
+C-CHARLIE,W2;W3,,
+C-DELTA,W4,,

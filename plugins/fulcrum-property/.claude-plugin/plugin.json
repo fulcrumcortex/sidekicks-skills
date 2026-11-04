@@ -1,0 +1,22 @@
+{
+  "name": "fulcrum-property",
+  "version": "0.1.0",
+  "description": "Real estate and property management skills: open-home follow-up, weekly vendor reports, lease-against-billing checks and tenancy issue triage.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "real-estate",
+    "property-management",
+    "vendor-report",
+    "tenancy",
+    "australia"
+  ],
+  "skills": "./skills/"
+}

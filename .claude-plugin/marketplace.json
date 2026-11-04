@@ -19,6 +19,131 @@
         "workspace",
         "code"
       ]
+    },
+    {
+      "name": "fulcrum-pa-core",
+      "source": "./plugins/fulcrum-pa-core",
+      "description": "Personal-assistant skills for any business owner: daily briefings, scheduling, meeting prep, lead capture, pipeline review, outbound call campaigns, invoice chasing, quotes, outreach compliance, review replies and turning a process into a new skill.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "personal-assistant",
+        "inbox",
+        "calendar",
+        "crm",
+        "sales",
+        "invoicing",
+        "compliance",
+        "australia"
+      ]
+    },
+    {
+      "name": "fulcrum-property",
+      "source": "./plugins/fulcrum-property",
+      "description": "Real estate and property management skills: open-home follow-up, weekly vendor reports, lease-against-billing checks and tenancy issue triage.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "real-estate",
+        "property-management",
+        "vendor-report",
+        "tenancy",
+        "australia"
+      ]
+    },
+    {
+      "name": "fulcrum-hospitality",
+      "source": "./plugins/fulcrum-hospitality",
+      "description": "Restaurant, venue and accommodation skills: reservations, function and catering quotes, guest stay communications and hospitality prospect research.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "hospitality",
+        "restaurant",
+        "reservations",
+        "catering",
+        "hotel",
+        "accommodation"
+      ]
+    },
+    {
+      "name": "fulcrum-care-workforce",
+      "source": "./plugins/fulcrum-care-workforce",
+      "description": "NDIS practice administration, care rostering and clinic skills: participant onboarding packs, progress notes, billing reconciliation, roster planning and appointment reminders.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "ndis",
+        "disability-support",
+        "allied-health",
+        "rostering",
+        "workforce",
+        "clinic"
+      ]
+    },
+    {
+      "name": "fulcrum-trades-field",
+      "source": "./plugins/fulcrum-trades-field",
+      "description": "Trades, construction and automotive skills: job confirmations and dispatch, takeoff-to-quote with stock checks, workshop job cards and site daily reports.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "trades",
+        "construction",
+        "automotive",
+        "quoting",
+        "field-service",
+        "whs"
+      ]
+    },
+    {
+      "name": "fulcrum-professional-services",
+      "source": "./plugins/fulcrum-professional-services",
+      "description": "Professional services skills: client engagement setup with WIP checks, insurance renewal campaigns and two-sided recruitment pipelines.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "professional-services",
+        "consulting",
+        "insurance-broker",
+        "recruitment",
+        "engagement-letter"
+      ]
+    },
+    {
+      "name": "fulcrum-web-builder",
+      "source": "./plugins/fulcrum-web-builder",
+      "description": "Website and UX/UI skills: Next.js and Tailwind v4 landing pages, design tokens, WCAG 2.2 AA audits, SEO and structured data, Core Web Vitals, conversion copy, responsive QA, UX critique and an anti-AI-slop design review.",
+      "version": "0.1.0",
+      "category": "development",
+      "keywords": [
+        "fulcrum",
+        "sidekick",
+        "web",
+        "nextjs",
+        "tailwind",
+        "accessibility",
+        "seo",
+        "core-web-vitals",
+        "ux",
+        "design"
+      ]
     }
-  ]
+  ],
+  "metadata": {
+    "description": "Fulcrum Sidekick skills: reusable procedures that teach an AI teammate how to run everyday business work, industry workflows and website builds, with approval gates and verification.",
+    "version": "0.2.0"
+  }
 }

@@ -6,7 +6,8 @@
     "name": "Fulcrum Cortex",
     "url": "https://fulcrumcortex.com/"
   },
-  "homepage": "https://fulcrumcortex.github.io/sidekicks/",
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
   "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "license": "MIT"
 }

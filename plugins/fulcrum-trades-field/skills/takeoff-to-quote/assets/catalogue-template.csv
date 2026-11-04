@@ -1,0 +1,4 @@
+code,description,supplier,purchase_unit,coverage,pack_size,unit_price_ex_gst,price_valid_until
+EX-PB-10,Plasterboard 10mm 2400x1200,Example Building Supplies,sheet,2.88,1,,
+EX-STUD-90,Stud 90x45 MGP10 2.4m,Example Timber Co,length,1,1,,
+EX-TILE-3060W,Wall tiles 300x600 gloss white,Example Tile House,box,1.44,1,,

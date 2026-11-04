@@ -1,0 +1,22 @@
+{
+  "name": "fulcrum-professional-services",
+  "version": "0.1.0",
+  "description": "Professional services skills: client engagement setup with WIP checks, insurance renewal campaigns and two-sided recruitment pipelines.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "professional-services",
+    "consulting",
+    "insurance-broker",
+    "recruitment",
+    "engagement-letter"
+  ],
+  "skills": "./skills/"
+}

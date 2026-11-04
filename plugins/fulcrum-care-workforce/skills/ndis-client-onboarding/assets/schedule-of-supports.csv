@@ -1,0 +1,4 @@
+budget,funding_type,support_item_number,support_item_name,unit,agreed_unit_price,price_limit_checked,frequency,quantity_per_period,period,estimated_total,goal_reference,notes
+Capacity Building - Improved Daily Living,plan-managed,[VERIFY: support item],[VERIFY: name exactly as in the current Support Catalogue],hour,[VERIFY: price],no,weekly,1,40 weeks,[calculate],Goal 1,Face-to-face sessions
+Capacity Building - Improved Daily Living,plan-managed,[VERIFY: support item],[VERIFY: name],hour,[VERIFY: price],no,as needed,0.5,per session,[calculate],Goal 1,Provider travel only if agreed and allowed
+Capacity Building - Improved Daily Living,plan-managed,[VERIFY: support item],[VERIFY: name],hour,[VERIFY: price],no,once,2,per plan,[calculate],Goal 1,Report writing only if requested and agreed

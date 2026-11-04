@@ -17,7 +17,8 @@ for skill in catalog['skills']:
     assert skill['role'] in roles,name
     assert name in next(r for r in catalog['roles'] if r['slug']==skill['role'])['skills'],name
     assert (path.parent/'agents/openai.yaml').is_file(),name
-files={str(p.relative_to(ROOT)) for p in (ROOT/'plugins').rglob('SKILL.md')}
+# catalog.json indexes the starter plugin shown on the showcase pages; other plugins are checked by validate.py
+files={str(p.relative_to(ROOT)) for p in (ROOT/'plugins'/catalog['plugin']).rglob('SKILL.md')}
 assert files=={s['path'] for s in catalog['skills']},'Unindexed or missing skills'
 manifest=json.loads((ROOT/'.claude-plugin/marketplace.json').read_text())
 for plugin in manifest['plugins']:

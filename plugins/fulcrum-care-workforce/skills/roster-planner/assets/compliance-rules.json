@@ -1,0 +1,10 @@
+{
+  "required_for_all": ["ndis_worker_screening", "first_aid", "cpr"],
+  "warn_within_days": 30,
+  "min_rest_hours": 10,
+  "max_shift_hours": 10,
+  "max_consecutive_days": 6,
+  "travel_buffer_minutes": 30,
+  "max_workers_per_client_week": 3,
+  "_notes": "Placeholder settings for the sample roster. Replace each value with your organisation's policy and the applicable Modern Award or enterprise agreement. Add state-specific checks such as a working with children check to required_for_all or to a shift's required_compliance column."
+}

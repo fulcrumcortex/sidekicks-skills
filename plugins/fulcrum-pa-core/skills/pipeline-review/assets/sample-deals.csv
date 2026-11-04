@@ -1,0 +1,9 @@
+deal_id,name,owner,stage,amount,probability,expected_close,last_activity,next_step,next_step_due,stage_entered,close_date_changes,status,closed_date
+D-101,Bluegum Dental - fit-out,Alex,Proposal,46500,,2026-11-20,2026-10-30,Walk through proposal v2,2026-11-10,2026-10-28,0,open,
+D-102,Orbit Freight - fleet servicing,Sam,Negotiation,18400,60,2026-11-03,2026-10-20,,,2026-10-01,2,open,
+D-103,Kestrel & Co - stage 3,Alex,Contract,22000,80,2026-11-27,2026-11-04,Send contract for signature,2026-11-06,2026-11-02,0,open,
+D-104,Banksia Fitness - new site,Sam,Qualified,9500,60,2026-12-15,2026-10-02,Book site visit,2026-10-15,2026-09-20,1,open,
+D-105,Harbour Gate Builders - variation,Alex,Closed Won,4200,,2026-11-04,2026-11-04,,,2026-11-04,0,won,2026-11-04
+D-106,Wattle Street Cafe - fit-out,,Lead,,,,2026-10-29,Qualify by phone,2026-11-09,2026-10-29,0,open,
+D-107,Saltbush Clinic - refurbishment,Sam,Proposal,31000,40,2026-11-28,2026-11-03,Answer pricing questions,2026-11-07,2026-10-25,0,open,
+D-108,Ironbark Legal - office move,Alex,Negotiation,64000,60,2027-01-30,2026-08-14,,,2026-07-01,3,open,

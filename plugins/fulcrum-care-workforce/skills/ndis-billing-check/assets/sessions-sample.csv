@@ -1,0 +1,11 @@
+session_id,participant_ref,date,start,end,status,notice_at,support_item,unit,quantity,unit_price,note_ref,worker
+S-1001,P-ALPHA,2026-10-06,09:00,10:00,completed,,TH_SESSION,hour,,100.00,N-501,Therapist A
+S-1001,P-ALPHA,2026-10-06,09:00,10:00,completed,,TH_TRAVEL,hour,0.5,100.00,N-501,Therapist A
+S-1002,P-ALPHA,2026-10-13,09:00,10:00,completed,,TH_SESSION,hour,,100.00,,Therapist A
+S-1003,P-BRAVO,2026-10-08,13:00,14:30,completed,,TH_SESSION,hour,,100.00,N-503,Therapist A
+S-1004,P-BRAVO,2026-10-15,13:00,14:30,cancelled,2026-10-14 08:10,TH_SESSION,hour,1.5,100.00,N-504,Therapist A
+S-1005,P-BRAVO,2026-10-22,13:00,14:30,cancelled,2026-10-16 16:00,TH_SESSION,hour,1.5,100.00,N-505,Therapist A
+S-1006,P-CHARLIE,2026-10-09,11:00,12:00,completed,,TH_SESSION,hour,,100.00,N-506,Therapist A
+S-1007,P-CHARLIE,2026-10-16,11:00,12:00,no_show,,TH_SESSION,hour,1,100.00,N-507,Therapist A
+S-1008,P-CHARLIE,2026-10-30,11:00,12:00,scheduled,,TH_SESSION,hour,,100.00,,Therapist A
+S-1009,P-ALPHA,2026-10-20,09:00,10:00,completed,,TH_REPORT,hour,2,100.00,N-509,Therapist A

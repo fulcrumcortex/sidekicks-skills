@@ -1,0 +1,25 @@
+{
+  "name": "fulcrum-pa-core",
+  "version": "0.1.0",
+  "description": "Personal-assistant skills for any business owner: daily briefings, scheduling, meeting prep, lead capture, pipeline review, outbound call campaigns, invoice chasing, quotes, outreach compliance, review replies and turning a process into a new skill.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "personal-assistant",
+    "inbox",
+    "calendar",
+    "crm",
+    "sales",
+    "invoicing",
+    "compliance",
+    "australia"
+  ],
+  "skills": "./skills/"
+}

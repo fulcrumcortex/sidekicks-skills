@@ -1,0 +1,13 @@
+fg,bg,use,label
+--ink,--canvas,text,body text on canvas
+--ink-muted,--canvas,text,muted text on canvas
+--ink-muted,--surface,text,muted text on surface
+--ink,--surface-raised,text,text on raised surface
+--on-accent,--accent,text,button label on accent
+--on-accent,--accent-strong,text,button label on accent hover
+--accent,--canvas,text,accent link on canvas
+--line-strong,--canvas,ui,input border on canvas
+--focus,--canvas,ui,focus ring on canvas
+--danger,--canvas,text,error text on canvas
+--success,--canvas,text,success text on canvas
+--warning,--canvas,text,warning text on canvas

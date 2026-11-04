@@ -1,0 +1,25 @@
+{
+  "name": "fulcrum-web-builder",
+  "version": "0.1.0",
+  "description": "Website and UX/UI skills: Next.js and Tailwind v4 landing pages, design tokens, WCAG 2.2 AA audits, SEO and structured data, Core Web Vitals, conversion copy, responsive QA, UX critique and an anti-AI-slop design review.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "web",
+    "nextjs",
+    "tailwind",
+    "accessibility",
+    "seo",
+    "core-web-vitals",
+    "ux",
+    "design"
+  ],
+  "skills": "./skills/"
+}

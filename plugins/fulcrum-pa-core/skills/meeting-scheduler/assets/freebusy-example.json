@@ -1,0 +1,46 @@
+{
+  "duration_minutes": 45,
+  "search": {"start": "2026-11-09", "end": "2026-11-13", "timezone": "Australia/Sydney"},
+  "now": "2026-11-06T10:00:00+11:00",
+  "min_notice_minutes": 120,
+  "step_minutes": 15,
+  "buffer_before_minutes": 10,
+  "buffer_after_minutes": 10,
+  "avoid_local": [["12:00", "13:00"]],
+  "max_options": 3,
+  "participants": [
+    {
+      "name": "Owner (Sydney)",
+      "timezone": "Australia/Sydney",
+      "required": true,
+      "working_hours": {
+        "mon": [["09:00", "17:30"]], "tue": [["09:00", "17:30"]], "wed": [["09:00", "17:30"]],
+        "thu": [["09:00", "17:30"]], "fri": [["09:00", "15:00"]]
+      },
+      "busy": [
+        {"start": "2026-11-09T09:00:00+11:00", "end": "2026-11-09T12:00:00+11:00"},
+        {"start": "2026-11-10T13:00:00+11:00", "end": "2026-11-10T15:30:00+11:00"},
+        {"date": "2026-11-12"}
+      ]
+    },
+    {
+      "name": "Client (Brisbane)",
+      "timezone": "Australia/Brisbane",
+      "required": true,
+      "busy": [
+        {"start": "2026-11-10T08:00:00", "end": "2026-11-10T11:00:00"},
+        {"start": "2026-11-11T14:00:00", "end": "2026-11-11T17:00:00"}
+      ]
+    },
+    {
+      "name": "Supplier (Perth)",
+      "timezone": "Australia/Perth",
+      "required": false,
+      "working_hours": {
+        "mon": [["08:00", "16:30"]], "tue": [["08:00", "16:30"]], "wed": [["08:00", "16:30"]],
+        "thu": [["08:00", "16:30"]], "fri": [["08:00", "16:30"]]
+      },
+      "busy": []
+    }
+  ]
+}

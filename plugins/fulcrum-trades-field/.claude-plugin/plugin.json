@@ -1,0 +1,23 @@
+{
+  "name": "fulcrum-trades-field",
+  "version": "0.1.0",
+  "description": "Trades, construction and automotive skills: job confirmations and dispatch, takeoff-to-quote with stock checks, workshop job cards and site daily reports.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "trades",
+    "construction",
+    "automotive",
+    "quoting",
+    "field-service",
+    "whs"
+  ],
+  "skills": "./skills/"
+}

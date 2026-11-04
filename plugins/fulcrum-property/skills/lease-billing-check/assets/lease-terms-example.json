@@ -1,0 +1,17 @@
+{
+  "_comment": "Fictional example. All money GST-exclusive. Fill from the signed lease and its variations; CPI index numbers come from the user.",
+  "commencement": "2024-07-01",
+  "end": "2026-08-31",
+  "base_rent": 120000,
+  "base_rent_basis": "annual",
+  "frequency": "monthly",
+  "gst_rate": 10,
+  "reviews": [
+    {"date": "2025-07-01", "type": "fixed", "percent": 4},
+    {"date": "2026-07-01", "type": "cpi", "cpi_old": 136.4, "cpi_new": 140.1, "floor_percent": null, "cap_percent": null, "ratchet": true}
+  ],
+  "incentives": [
+    {"from": "2024-07-01", "to": "2024-08-15", "payable_percent": 0},
+    {"from": "2024-08-16", "to": "2024-12-31", "payable_percent": 50}
+  ]
+}

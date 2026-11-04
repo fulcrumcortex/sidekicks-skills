@@ -1,0 +1,23 @@
+{
+  "name": "fulcrum-hospitality",
+  "version": "0.1.0",
+  "description": "Restaurant, venue and accommodation skills: reservations, function and catering quotes, guest stay communications and hospitality prospect research.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "hospitality",
+    "restaurant",
+    "reservations",
+    "catering",
+    "hotel",
+    "accommodation"
+  ],
+  "skills": "./skills/"
+}

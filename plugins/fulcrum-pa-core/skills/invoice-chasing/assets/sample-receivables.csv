@@ -1,0 +1,11 @@
+ContactName,EmailAddress,InvoiceNumber,InvoiceDate,DueDate,Total,AmountPaid,AmountCredited,Status,Disputed
+Wattle Street Cafe (fictional),accounts@example.com,INV-1001,01/09/2026,01/10/2026,"1,320.00",0,0,AUTHORISED,
+Wattle Street Cafe (fictional),accounts@example.com,INV-1019,15/10/2026,29/10/2026,440.00,0,0,AUTHORISED,
+Bluegum Joinery (fictional),ap@example.com,INV-0987,10/06/2026,10/07/2026,"8,800.00",2000.00,0,AUTHORISED,
+Harbour Lane Dental (fictional),,INV-1011,20/09/2026,04/10/2026,660.00,0,0,AUTHORISED,yes
+Kookaburra Events (fictional),finance@example.com,INV-1023,28/10/2026,27/11/2026,"2,750.00",0,0,AUTHORISED,
+Kookaburra Events (fictional),finance@example.com,CN-0040,02/10/2026,02/10/2026,-275.00,0,0,AUTHORISED,
+Saltbush Freight (fictional),billing@example.com,INV-0955,05/05/2026,04/06/2026,"3,300.00",0,0,AUTHORISED,
+Saltbush Freight (fictional),billing@example.com,INV-1002,02/09/2026,02/10/2026,990.00,990.00,0,PAID,
+Mallee Print Co (fictional),hello@example.com,INV-1015,01/10/2026,,"1,100.00",0,0,AUTHORISED,
+Mallee Print Co (fictional),hello@example.com,INV-1016,03/10/2026,17/10/2026,0.00,0,0,DRAFT,

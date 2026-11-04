@@ -1,0 +1,11 @@
+shift_id,client_ref,start,end,location,required_skills,required_compliance,worker_id
+SH-01,C-ALPHA,2026-11-09 07:00,2026-11-09 10:00,Northside,personal_care,,W1
+SH-02,C-BRAVO,2026-11-09 18:00,2026-11-09 22:00,Eastgate,personal_care,,W1
+SH-03,C-ALPHA,2026-11-10 06:00,2026-11-10 09:00,Northside,personal_care,,W1
+SH-04,C-CHARLIE,2026-11-10 09:00,2026-11-10 13:00,Riverbend,peg_feeding;personal_care,,W2
+SH-05,C-BRAVO,2026-11-10 10:00,2026-11-10 14:00,Eastgate,personal_care,driver_licence,W2
+SH-06,C-ALPHA,2026-11-11 07:00,2026-11-11 10:00,Northside,personal_care,,
+SH-07,C-CHARLIE,2026-11-11 22:00,2026-11-12 07:00,Riverbend,personal_care,,W3
+SH-08,C-DELTA,2026-11-12 09:00,2026-11-12 12:00,Northside,community_access,driver_licence,W4
+SH-09,C-ALPHA,2026-11-12 07:00,2026-11-12 10:00,Northside,personal_care,,W3
+SH-10,C-DELTA,2026-11-13 13:00,2026-11-13 16:00,Northside,community_access,driver_licence,

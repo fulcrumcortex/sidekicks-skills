@@ -1,0 +1,23 @@
+{
+  "name": "fulcrum-care-workforce",
+  "version": "0.1.0",
+  "description": "NDIS practice administration, care rostering and clinic skills: participant onboarding packs, progress notes, billing reconciliation, roster planning and appointment reminders.",
+  "author": {
+    "name": "Fulcrum Cortex",
+    "url": "https://fulcrumcortex.com/"
+  },
+  "homepage": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "repository": "https://github.com/fulcrumcortex/sidekicks-skills",
+  "license": "MIT",
+  "keywords": [
+    "fulcrum",
+    "sidekick",
+    "ndis",
+    "disability-support",
+    "allied-health",
+    "rostering",
+    "workforce",
+    "clinic"
+  ],
+  "skills": "./skills/"
+}
