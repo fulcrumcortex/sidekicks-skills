@@ -6,7 +6,7 @@ A **Sidekick** is an AI teammate. A **skill** is a reusable set of instructions 
 
 Skills guide behaviour. **Installing a skill does not connect an app, grant permissions or give access to your inbox, customer data or production systems.** What an agent can actually read or change comes from the tools and account permissions in your host.
 
-[Fulcrum Cortex on GitHub](https://fulcrumcortex.github.io/) · [Product documentation](https://fulcrumcortex.github.io/documentation/) · [Fulcrum Cortex](https://fulcrumcortex.com/) · [Fulcrum CRM](https://fulcrumcrm.app/) · [Lyre](https://lyre.au/) · [Fulcrum Mail](https://fulcrumail.app/) · [Fulcrum Code](https://fulcrumcode.app/)
+[Meet the Sidekicks](https://fulcrumcortex.github.io/sidekicks/) · [Screenshots and examples](https://fulcrumcortex.com/sidekicks) · [Fulcrum Cortex on GitHub](https://fulcrumcortex.github.io/) · [Product documentation](https://fulcrumcortex.github.io/documentation/) · [Fulcrum Cortex](https://fulcrumcortex.com/) · [Fulcrum CRM](https://fulcrumcrm.app/) · [Lyre](https://lyre.au/) · [Fulcrum Mail](https://fulcrumail.app/) · [Fulcrum Code](https://fulcrumcode.app/)
 
 ## Install
 
@@ -19,6 +19,14 @@ Add this repository as a plugin marketplace, then install the packs you want:
 /plugin install fulcrum-pa-core@fulcrum-sidekicks
 /plugin install fulcrum-web-builder@fulcrum-sidekicks
 ```
+
+On recent Claude Code versions you can add the marketplace and install a pack in one step:
+
+```text
+/plugin install fulcrum-property --marketplace fulcrumcortex/sidekicks-skills
+```
+
+From a terminal, the same steps are `claude plugin marketplace add fulcrumcortex/sidekicks-skills` and `claude plugin install fulcrum-pa-core@fulcrum-sidekicks`.
 
 The marketplace is named `fulcrum-sidekicks`. Install only the industry packs you need, for example `fulcrum-property@fulcrum-sidekicks` or `fulcrum-care-workforce@fulcrum-sidekicks`. Run `/plugin` to browse, update or remove them. Plugin skills are namespaced, for example `fulcrum-pa-core:invoice-chasing`.
 
@@ -151,25 +159,19 @@ Show me who to chase this week and draft the reminders. Do not send anything.
 
 ### fulcrum-sidekicks: starter pack for the Fulcrum suite
 
-| Skill | What it does |
-| --- | --- |
-| [fulcrum-coordinate-work](plugins/fulcrum-sidekicks/skills/fulcrum-coordinate-work/SKILL.md) | Coordinates a business outcome across people and tools, with owners, dependencies and evidence. |
-| [fulcrum-code-change](plugins/fulcrum-sidekicks/skills/fulcrum-code-change/SKILL.md) | Makes a reviewable code change that keeps project conventions and validates the behaviour. |
-| [fulcrum-release-check](plugins/fulcrum-sidekicks/skills/fulcrum-release-check/SKILL.md) | Verifies an authorised release from source to live. |
-| [fulcrum-crm-follow-up](plugins/fulcrum-sidekicks/skills/fulcrum-crm-follow-up/SKILL.md) | Prepares a customer follow-up grounded in the CRM record and the agreed next step. |
-| [fulcrum-crm-data-cleanup](plugins/fulcrum-sidekicks/skills/fulcrum-crm-data-cleanup/SKILL.md) | Reviews CRM data quality without merging uncertain matches. |
-| [fulcrum-voice-agent-setup](plugins/fulcrum-sidekicks/skills/fulcrum-voice-agent-setup/SKILL.md) | Configures a focused Lyre voice agent. |
-| [fulcrum-call-review](plugins/fulcrum-sidekicks/skills/fulcrum-call-review/SKILL.md) | Reviews a call and checks that the promised actions happened. |
-| [fulcrum-inbox-triage](plugins/fulcrum-sidekicks/skills/fulcrum-inbox-triage/SKILL.md) | Triages an inbox with context. |
-| [fulcrum-booking-setup](plugins/fulcrum-sidekicks/skills/fulcrum-booking-setup/SKILL.md) | Sets up and checks a booking page. |
-| [fulcrum-meeting-actions](plugins/fulcrum-sidekicks/skills/fulcrum-meeting-actions/SKILL.md) | Turns a meeting into accountable actions. |
-| [fulcrum-document-review](plugins/fulcrum-sidekicks/skills/fulcrum-document-review/SKILL.md) | Reviews a business document. |
-| [fulcrum-file-sharing](plugins/fulcrum-sidekicks/skills/fulcrum-file-sharing/SKILL.md) | Shares a file with the intended audience. |
-| [fulcrum-wallet-check](plugins/fulcrum-sidekicks/skills/fulcrum-wallet-check/SKILL.md) | Reconciles a Wallet balance question. |
-| [fulcrum-campaign-brief](plugins/fulcrum-sidekicks/skills/fulcrum-campaign-brief/SKILL.md) | Prepares a campaign brief from verified product facts. |
-| [fulcrum-project-planning](plugins/fulcrum-sidekicks/skills/fulcrum-project-planning/SKILL.md) | Plans work with acceptance evidence. |
-| [fulcrum-cad-design-brief](plugins/fulcrum-sidekicks/skills/fulcrum-cad-design-brief/SKILL.md) | Prepares an editable CAD design brief. |
-| [fulcrum-private-message-draft](plugins/fulcrum-sidekicks/skills/fulcrum-private-message-draft/SKILL.md) | Drafts a private message from supplied context. |
+The starter pack is organised by Sidekick role. Each role links to its page in the [Sidekick showcase](https://fulcrumcortex.github.io/sidekicks/).
+
+| Sidekick | What it helps you do | Skills |
+| --- | --- | --- |
+| [Coordination Sidekick](https://fulcrumcortex.github.io/sidekicks/coordinator/) | Coordinate a business request across people and tools with clear owners, dependencies and evidence. | [Coordinate a business outcome](plugins/fulcrum-sidekicks/skills/fulcrum-coordinate-work/SKILL.md) |
+| [Developer Sidekick](https://fulcrumcortex.github.io/sidekicks/developer/) | Investigate code, make a bounded change, run the relevant checks and verify an authorised release. | [Make a reviewable code change](plugins/fulcrum-sidekicks/skills/fulcrum-code-change/SKILL.md), [Verify a release from source to live](plugins/fulcrum-sidekicks/skills/fulcrum-release-check/SKILL.md) |
+| [Sales Sidekick](https://fulcrumcortex.github.io/sidekicks/sales/) | Prepare grounded follow-ups and keep contact data useful without inventing commitments or merging uncertain matches. | [Prepare a customer follow-up](plugins/fulcrum-sidekicks/skills/fulcrum-crm-follow-up/SKILL.md), [Review CRM data quality](plugins/fulcrum-sidekicks/skills/fulcrum-crm-data-cleanup/SKILL.md) |
+| [Voice Sidekick](https://fulcrumcortex.github.io/sidekicks/voice/) | Prepare focused Lyre agents, review what callers asked and check whether promised actions actually happened. | [Configure a focused voice agent](plugins/fulcrum-sidekicks/skills/fulcrum-voice-agent-setup/SKILL.md), [Review a call and its follow-through](plugins/fulcrum-sidekicks/skills/fulcrum-call-review/SKILL.md) |
+| [Workspace Sidekick](https://fulcrumcortex.github.io/sidekicks/workspace/) | Triage email, prepare booking pages, extract meeting actions, review documents and manage requested file access. | [Triage an inbox with context](plugins/fulcrum-sidekicks/skills/fulcrum-inbox-triage/SKILL.md), [Set up and check a booking page](plugins/fulcrum-sidekicks/skills/fulcrum-booking-setup/SKILL.md), [Turn a meeting into accountable actions](plugins/fulcrum-sidekicks/skills/fulcrum-meeting-actions/SKILL.md), [Review a business document](plugins/fulcrum-sidekicks/skills/fulcrum-document-review/SKILL.md), [Share a file with the intended audience](plugins/fulcrum-sidekicks/skills/fulcrum-file-sharing/SKILL.md), [Reconcile a Wallet balance question](plugins/fulcrum-sidekicks/skills/fulcrum-wallet-check/SKILL.md) |
+| [Marketing Sidekick](https://fulcrumcortex.github.io/sidekicks/marketing/) | Turn verified product facts into a campaign brief, practical article and channel-specific copy. | [Prepare a grounded campaign brief](plugins/fulcrum-sidekicks/skills/fulcrum-campaign-brief/SKILL.md) |
+| [Delivery Sidekick](https://fulcrumcortex.github.io/sidekicks/delivery/) | Turn a delivery brief into a practical plan with dependencies, acceptance criteria and a visible handoff. | [Plan work with acceptance evidence](plugins/fulcrum-sidekicks/skills/fulcrum-project-planning/SKILL.md) |
+| [Design Sidekick](https://fulcrumcortex.github.io/sidekicks/design/) | Prepare a constrained spatial brief and, when connected, review a concept in the editable CAD model. | [Prepare an editable CAD design brief](plugins/fulcrum-sidekicks/skills/fulcrum-cad-design-brief/SKILL.md) |
+| [Private communications Sidekick](https://fulcrumcortex.github.io/sidekicks/private-comms/) | Draft a private update from supplied context without assuming access to encrypted conversations or keys. | [Draft a private message](plugins/fulcrum-sidekicks/skills/fulcrum-private-message-draft/SKILL.md) |
 
 ## What to expect from a skill
 
